@@ -13,11 +13,12 @@ import de.kcodeyt.heads.entity.EntitySkull;
 import de.kcodeyt.heads.listener.EventListener;
 import de.kcodeyt.heads.util.HeadInput;
 import de.kcodeyt.heads.util.ItemResult;
+import de.kcodeyt.heads.util.ScheduledFuture;
 import de.kcodeyt.heads.util.SkullOwner;
 import de.kcodeyt.heads.util.api.SkinAPI;
 import de.kcodeyt.heads.util.api.SkinData;
 
-import java.util.concurrent.CompletableFuture;
+import java.lang.reflect.Field;
 import java.util.concurrent.CompletionException;
 
 public class Heads extends PluginBase {
@@ -31,9 +32,9 @@ public class Heads extends PluginBase {
         Block.list[Block.SKULL_BLOCK] = BlockSkull.class;
         int dataBits;
         try {
-            Class.forName("cn.nukkit.api.PowerNukkitOnly");
-            dataBits = Block.DATA_BITS;
-        } catch(ClassNotFoundException e) {
+            final Field dataBitsField = Block.class.getDeclaredField("DATA_BITS");
+            dataBits = (int) dataBitsField.get(null);
+        } catch(NoSuchFieldException | IllegalAccessException e) {
             dataBits = 4;
         }
         for(int data = 0; data < (1 << dataBits); ++data)
@@ -46,7 +47,7 @@ public class Heads extends PluginBase {
         this.getServer().getCommandMap().register("heads", new DebugHeadCommand());
     }
 
-    public static CompletableFuture<ItemResult> createItem(HeadInput input) {
+    public static ScheduledFuture<ItemResult> createItem(HeadInput input) {
         switch(input.getType()) {
             case PLAYER:
                 return SkinAPI.getSkin(input.getName()).thenApply(skinResponse -> {
@@ -57,14 +58,13 @@ public class Heads extends PluginBase {
                     throw new CompletionException(new Throwable());
                 });
             case TEXTURE:
-                return CompletableFuture.completedFuture(new ItemResult(Heads.createItemByOwner(new SkullOwner(input.getUniqueId(), null, input.getTexture())), null));
+                return ScheduledFuture.completed(new ItemResult(Heads.createItemByOwner(new SkullOwner(input.getUniqueId(), null, input.getTexture())), null));
         }
-        return CompletableFuture.completedFuture(null);
+        return ScheduledFuture.completed(null);
     }
 
     public static Item createItemByOwner(SkullOwner skullOwner) {
-        final Item item = Item.get(Item.SKULL, 3, 1);
-        item.setCustomBlockData(new CompoundTag().putCompound("Owner", skullOwner.toCompoundTag()));
+        final Item item = Item.get(Item.SKULL, 3, 1).setNamedTag(new CompoundTag().putCompound("SkullOwner", skullOwner.toCompoundTag()));
         if(skullOwner.getName() != null)
             item.setCustomName("§r§f" + skullOwner.getName() + "'s Head");
         return item;

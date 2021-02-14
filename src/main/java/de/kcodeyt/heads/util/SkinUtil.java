@@ -6,22 +6,22 @@ import de.kcodeyt.heads.util.api.SkinAPI;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SkinUtil {
 
     public static final String PLACED_SKULL_GEOMETRY = "{\"format_version\":\"1.12.0\",\"minecraft:geometry\":[{\"description\":{\"identifier\":\"geometry.heads.placed\",\"texture_width\":64,\"texture_height\":64,\"visible_bounds_width\":2,\"visible_bounds_height\":1,\"visible_bounds_offset\":[0,0,0]},\"bones\":[{\"name\":\"head\",\"pivot\":[0,24,0],\"cubes\":[{\"origin\":[-4,0,-4],\"size\":[8,8,8],\"uv\":[0,0]}]},{\"name\":\"hat\",\"parent\":\"head\",\"pivot\":[0,24,0],\"cubes\":[{\"origin\":[-4,0,-4],\"size\":[8,8,8],\"inflate\":0.2,\"uv\":[32,0]}]}]}]}";
     public static final String PLACED_SKULL_GEOMETRY_NAME = "geometry.heads.placed";
 
-    private static final Map<String, SerializedImage> SKINS = new HashMap<>();
+    private static final Map<String, SerializedImage> SKINS = new ConcurrentHashMap<>();
 
-    public static CompletableFuture<SerializedImage> base64Texture(String texture) {
+    public static ScheduledFuture<SerializedImage> base64Texture(String texture) {
         if(SKINS.containsKey(texture))
-            return CompletableFuture.completedFuture(SKINS.get(texture));
-        return CompletableFuture.supplyAsync(() -> {
+            return ScheduledFuture.completed(SKINS.get(texture));
+        return ScheduledFuture.supplyAsync(() -> {
             try {
                 final BufferedImage bufferedImage = ImageIO.read(new URL(SkinAPI.fromBase64(texture)));
                 final byte[] imageData = new byte[bufferedImage.getHeight() * bufferedImage.getWidth() * 4];
@@ -35,13 +35,12 @@ public class SkinUtil {
                         imageData[cursor++] = (byte) ((color >> 24) & 0xFF);
                     }
                 }
-                return new SerializedImage(bufferedImage.getWidth(), bufferedImage.getHeight(), imageData);
+                final SerializedImage serializedImage;
+                SKINS.put(texture, serializedImage = new SerializedImage(bufferedImage.getWidth(), bufferedImage.getHeight(), imageData));
+                return serializedImage;
             } catch(Throwable throwable) {
                 throw new CompletionException(throwable);
             }
-        }).whenComplete((serializedImage, throwable) -> {
-            if(serializedImage != null)
-                SKINS.put(texture, serializedImage);
         });
     }
 

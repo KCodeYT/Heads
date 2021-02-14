@@ -23,9 +23,14 @@ public class BlockEntitySkull extends cn.nukkit.blockentity.BlockEntitySkull {
         if(!this.isBlockEntityValid())
             return;
 
+        final CompoundTag skullOwnerTag = this.namedTag.getCompound("SkullOwner");
         final CompoundTag ownerTag = this.namedTag.getCompound("Owner");
         if(!ownerTag.isEmpty())
             this.skullOwner = SkullOwner.fromCompoundTag(ownerTag);
+        else if(!skullOwnerTag.isEmpty()) {
+            this.skullOwner = SkullOwner.fromCompoundTag(skullOwnerTag);
+            this.namedTag.remove("SkullOwner");
+        }
 
         super.initBlockEntity();
         if(this.skullOwner == null)

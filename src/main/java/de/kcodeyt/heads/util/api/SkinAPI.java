@@ -2,12 +2,11 @@ package de.kcodeyt.heads.util.api;
 
 import cn.nukkit.utils.SerializedImage;
 import com.google.gson.Gson;
+import de.kcodeyt.heads.util.ScheduledFuture;
 import de.kcodeyt.heads.util.SkinUtil;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -15,6 +14,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Pattern;
 
 public class SkinAPI {
@@ -23,11 +24,11 @@ public class SkinAPI {
 
     private static final Pattern UUID_PATTERN = Pattern.compile("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})");
 
-    private static final Map<String, String> UUID_CACHE = new HashMap<>();
-    private static final List<SkinData> SKIN_CACHE = new ArrayList<>();
+    private static final Map<String, String> UUID_CACHE = new ConcurrentHashMap<>();
+    private static final List<SkinData> SKIN_CACHE = new CopyOnWriteArrayList<>();
 
-    public static CompletableFuture<SkinResponse> getSkin(String name) {
-        return CompletableFuture.supplyAsync(() -> {
+    public static ScheduledFuture<SkinResponse> getSkin(String name) {
+        return ScheduledFuture.supplyAsync(() -> {
             String uniqueId;
             String playerName;
             String foundName = null;
@@ -103,11 +104,11 @@ public class SkinAPI {
         return content;
     }
 
-    public static CompletableFuture<SerializedImage> getSkinByTexture(String texture) {
-        SkinData skin;
+    public static ScheduledFuture<SerializedImage> getSkinByTexture(String texture) {
+        final SkinData skin;
         if((skin = SKIN_CACHE.stream().filter(skinData -> skinData.getTexture().equalsIgnoreCase(texture)).findAny().orElse(null)) == null)
             return SkinUtil.base64Texture(texture);
-        return CompletableFuture.completedFuture(skin.getSerializedImage());
+        return ScheduledFuture.completed(skin.getSerializedImage());
     }
 
 }

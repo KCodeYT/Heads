@@ -3,6 +3,7 @@ package de.kcodeyt.heads.manager;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.level.Location;
 import cn.nukkit.math.BlockFace;
+import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.nbt.tag.IntTag;
 import cn.nukkit.nbt.tag.ListTag;
@@ -19,10 +20,10 @@ public class SkullManager {
         final BlockFace blockFace = BlockFace.fromIndex(blockEntitySkull.getBlock().getDamage());
         if(blockFace == BlockFace.DOWN)
             return null;
-        final Location location = Location.fromObject(blockEntitySkull.add(0.5, -0.00735, 0.5));
+        Location location = Location.fromObject(blockEntitySkull.add(0.5, -0.00735, 0.5));
         location.yaw = blockFace == BlockFace.UP ? (blockEntitySkull.namedTag.getByte("Rot") * 22.5 + 180) % 360 : blockFace.getHorizontalIndex() * 90;
         if(blockFace != BlockFace.UP)
-            location.setComponents(location.add(blockFace.getUnitVector().multiply(-0.23895).add(0, 0.25, 0)));
+            location = location.add(blockFace.getUnitVector().multiply(-0.23895).add(0, 0.25, 0));
 
         final EntitySkull entitySkull = new EntitySkull(
                 blockEntitySkull.getChunk(),
