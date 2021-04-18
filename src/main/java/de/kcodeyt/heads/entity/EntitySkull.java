@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 
 public class EntitySkull extends EntityHuman {
 
-    private static final float SCALE = 1.07f;
+    private static final float SCALE = 1.068f;
 
     private final Vector3 boundBlock;
     private final SetEntityDataPacket packet;

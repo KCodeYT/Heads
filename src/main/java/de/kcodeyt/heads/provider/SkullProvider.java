@@ -1,9 +1,8 @@
-package de.kcodeyt.heads.manager;
+package de.kcodeyt.heads.provider;
 
 import cn.nukkit.entity.Entity;
 import cn.nukkit.level.Location;
 import cn.nukkit.math.BlockFace;
-import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.nbt.tag.IntTag;
 import cn.nukkit.nbt.tag.ListTag;
@@ -13,7 +12,7 @@ import de.kcodeyt.heads.entity.EntitySkull;
 
 import java.util.UUID;
 
-public class SkullManager {
+public class SkullProvider {
 
     public static EntitySkull createSkullEntity(SerializedImage image, BlockEntitySkull blockEntitySkull) {
         //noinspection deprecation
@@ -35,9 +34,7 @@ public class SkullManager {
                         putList(new ListTag<>("BoundBlock").
                                 add(new IntTag("x", blockEntitySkull.getFloorX())).
                                 add(new IntTag("y", blockEntitySkull.getFloorY())).
-                                add(new IntTag("z", blockEntitySkull.getFloorZ()))
-                        )
-        );
+                                add(new IntTag("z", blockEntitySkull.getFloorZ()))));
         entitySkull.spawnToAll();
         return entitySkull;
     }

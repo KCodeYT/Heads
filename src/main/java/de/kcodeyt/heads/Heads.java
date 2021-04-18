@@ -6,6 +6,7 @@ import cn.nukkit.entity.Entity;
 import cn.nukkit.item.Item;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.plugin.PluginBase;
+import cn.nukkit.utils.Config;
 import de.kcodeyt.heads.block.BlockSkull;
 import de.kcodeyt.heads.blockentity.BlockEntitySkull;
 import de.kcodeyt.heads.command.DebugHeadCommand;
@@ -26,6 +27,17 @@ public class Heads extends PluginBase {
     @Override
     @SuppressWarnings("deprecation")
     public void onLoad() {
+        final Config config = this.getConfig();
+        config.reload();
+        if(!config.exists("save-skin-cache")) {
+            config.set("save-skin-cache", true);
+            config.save();
+        }
+        if(!config.exists("skin-cache-folder")) {
+            config.set("skin-cache-folder", "./skins/");
+            config.save();
+        }
+
         Entity.registerEntity("Skull", EntitySkull.class, true);
         BlockEntity.registerBlockEntity(BlockEntity.SKULL, BlockEntitySkull.class);
 

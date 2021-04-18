@@ -3,7 +3,7 @@ package de.kcodeyt.heads.blockentity;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.nbt.tag.CompoundTag;
 import de.kcodeyt.heads.entity.EntitySkull;
-import de.kcodeyt.heads.manager.SkullManager;
+import de.kcodeyt.heads.provider.SkullProvider;
 import de.kcodeyt.heads.util.SkullOwner;
 import de.kcodeyt.heads.util.api.SkinAPI;
 import lombok.Getter;
@@ -42,7 +42,7 @@ public class BlockEntitySkull extends cn.nukkit.blockentity.BlockEntitySkull {
         SkinAPI.getSkinByTexture(this.skullOwner.getTexture()).
                 whenComplete((serializedImage, throwable) -> {
                     if(serializedImage != null)
-                        this.entitySkull = SkullManager.createSkullEntity(serializedImage, this);
+                        this.entitySkull = SkullProvider.createSkullEntity(serializedImage, this);
                     else {
                         this.namedTag.remove("Owner");
                         this.skullOwner = null;

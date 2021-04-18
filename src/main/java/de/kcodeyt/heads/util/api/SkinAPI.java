@@ -12,7 +12,6 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -53,11 +52,13 @@ public class SkinAPI {
             SkinData skin;
             if((skin = SKIN_CACHE.stream().filter(skinData -> skinData.getSkinOwnerName().equalsIgnoreCase(playerName) || skinData.getSkinOwnerUniqueId().equals(uniqueId)).findAny().orElse(null)) == null) {
                 try {
-                    final Map<String, Object> profileData = GSON.<Map<String, Object>>fromJson(httpRequest(Mojang.SESSION_SERVER + URLEncoder.encode(uniqueId.replace("-", ""), "UTF-8")), Map.class);
-                    if(profileData.isEmpty())
+                    final Mojang.Profile profile = GSON.fromJson(httpRequest(Mojang.SESSION_SERVER + URLEncoder.encode(uniqueId.replace("-", ""), "UTF-8")), Mojang.Profile.class);
+                    if(profile.isError())
                         return SkinResponse.NOT_FOUND;
 
-                    final String texture = shrinkBase64((String) ((Map<?, ?>) ((List<?>) profileData.get("properties")).get(0)).get("value"));
+                    final String texture = shrinkBase64(profile.getProperties().stream().
+                            filter(property -> property.getName().equals("textures")).findAny().
+                            orElseThrow(NullPointerException::new).getValue());
                     SKIN_CACHE.removeIf(skinData -> skinData.getTexture().equalsIgnoreCase(texture));
 
                     skin = SkinData.builder().
@@ -82,7 +83,7 @@ public class SkinAPI {
     }
 
     public static String fromBase64(String base64Texture) {
-        return (String) ((Map<?, ?>) ((Map<?, ?>) GSON.fromJson(new String(Base64.getDecoder().decode(base64Texture)), Map.class).get("textures")).get("SKIN")).get("url");
+        return GSON.fromJson(new String(Base64.getDecoder().decode(base64Texture)), Mojang.DecodedTexturesProperty.class).getTextures().get("SKIN").getUrl();
     }
 
     private static String httpRequest(String urlSpec) throws IOException {
