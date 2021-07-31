@@ -8,9 +8,6 @@ import cn.nukkit.nbt.tag.CompoundTag;
 import de.kcodeyt.heads.Heads;
 import de.kcodeyt.heads.blockentity.BlockEntitySkull;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 public class BlockSkull extends cn.nukkit.block.BlockSkull {
 
     public BlockSkull() {
@@ -22,7 +19,7 @@ public class BlockSkull extends cn.nukkit.block.BlockSkull {
     }
 
     @Override
-    public boolean place(@Nonnull Item item, @Nonnull Block block, @Nonnull Block target, @Nonnull BlockFace face, double fx, double fy, double fz, @Nullable Player player) {
+    public boolean place(Item item, Block block, Block target, BlockFace face, double fx, double fy, double fz, Player player) {
         final Item itemClone = item.clone();
         final CompoundTag namedTag = itemClone.getNamedTag();
         if(itemClone.hasCompoundTag() && namedTag.contains("SkullOwner")) {
@@ -35,9 +32,9 @@ public class BlockSkull extends cn.nukkit.block.BlockSkull {
 
     @Override
     public Item[] getDrops(Item item) {
-        final BlockEntitySkull blockEntitySkull = (BlockEntitySkull) this.getLevel().getBlockEntity(this);
-        if(blockEntitySkull != null && blockEntitySkull.getSkullOwner() != null)
-            return new Item[]{Heads.createItemByOwner(blockEntitySkull.getSkullOwner())};
+        final BlockEntitySkull blockEntity = (BlockEntitySkull) this.getLevel().getBlockEntity(this);
+        if(blockEntity != null && blockEntity.getSkullOwner() != null)
+            return new Item[]{Heads.createItemByOwner(blockEntity.getSkullOwner())};
         return super.getDrops(item);
     }
 

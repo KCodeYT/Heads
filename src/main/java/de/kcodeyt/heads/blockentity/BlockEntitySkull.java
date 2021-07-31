@@ -41,6 +41,8 @@ public class BlockEntitySkull extends cn.nukkit.blockentity.BlockEntitySkull {
 
         SkinAPI.getSkinByTexture(this.skullOwner.getTexture()).
                 whenComplete((serializedImage, throwable) -> {
+                    if(this.closed)
+                        return;
                     if(serializedImage != null)
                         this.entitySkull = SkullProvider.createSkullEntity(serializedImage, this);
                     else {

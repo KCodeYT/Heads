@@ -80,16 +80,20 @@ public class ScheduledFuture<V> {
     public ScheduledFuture<V> whenComplete(BiConsumer<V, Exception> consumer) {
         if(this.state != COMPLETED)
             this.syncQueue.add(consumer);
-        else
+        else if(!Server.getInstance().isPrimaryThread())
             this.scheduler.scheduleTask(null, () -> consumer.accept(this.value, this.exception));
+        else
+            consumer.accept(this.value, this.exception);
         return this;
     }
 
     public ScheduledFuture<V> whenCompleteAsync(BiConsumer<V, Exception> consumer) {
         if(this.state != COMPLETED)
             this.asyncQueue.add(consumer);
-        else
+        else if(Server.getInstance().isPrimaryThread())
             this.scheduler.scheduleTask(null, () -> consumer.accept(this.value, this.exception), true);
+        else
+            consumer.accept(this.value, this.exception);
         return this;
     }
 

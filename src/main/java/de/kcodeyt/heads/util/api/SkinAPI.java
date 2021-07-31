@@ -2,17 +2,17 @@ package de.kcodeyt.heads.util.api;
 
 import cn.nukkit.utils.SerializedImage;
 import com.google.gson.Gson;
+import de.kcodeyt.heads.Heads;
 import de.kcodeyt.heads.util.ScheduledFuture;
 import de.kcodeyt.heads.util.SkinUtil;
+import de.kcodeyt.heads.util.api.Mojang.SessionProfile;
+import de.kcodeyt.heads.util.api.Mojang.UserProfile;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.concurrent.CompletionException;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Pattern;
@@ -28,31 +28,25 @@ public class SkinAPI {
 
     public static ScheduledFuture<SkinResponse> getSkin(String name) {
         return ScheduledFuture.supplyAsync(() -> {
-            String uniqueId;
-            String playerName;
-            String foundName = null;
-            for(String uuidKey : UUID_CACHE.keySet()) {
-                if(uuidKey.equalsIgnoreCase(name))
-                    foundName = uuidKey;
-            }
-            if(foundName == null) {
-                try {
-                    final Map<String, String> profileData = GSON.<Map<String, String>>fromJson(httpRequest(Mojang.API + URLEncoder.encode(name, "UTF-8")), Map.class);
-                    if(profileData.isEmpty())
-                        return SkinResponse.NOT_FOUND;
-                    uniqueId = UUID_PATTERN.matcher(profileData.get("id")).replaceFirst("$1-$2-$3-$4-$5");
-                    playerName = profileData.get("name");
-                    UUID_CACHE.put(playerName, uniqueId);
-                } catch(Throwable throwable) {
-                    throw new CompletionException(throwable);
+            try {
+                String uniqueId;
+                String playerName;
+                String foundName = null;
+                for(String uuidKey : UUID_CACHE.keySet()) {
+                    if(uuidKey.equalsIgnoreCase(name))
+                        foundName = uuidKey;
                 }
-            } else
-                uniqueId = UUID_CACHE.get(playerName = foundName);
+                if(foundName == null) {
+                    final UserProfile userProfile = Mojang.API.request(name);
+                    uniqueId = UUID_PATTERN.matcher(userProfile.getId()).replaceFirst("$1-$2-$3-$4-$5");
+                    playerName = userProfile.getName();
+                    UUID_CACHE.put(playerName, uniqueId);
+                } else
+                    uniqueId = UUID_CACHE.get(playerName = foundName);
 
-            SkinData skin;
-            if((skin = SKIN_CACHE.stream().filter(skinData -> skinData.getSkinOwnerName().equalsIgnoreCase(playerName) || skinData.getSkinOwnerUniqueId().equals(uniqueId)).findAny().orElse(null)) == null) {
-                try {
-                    final Mojang.Profile profile = GSON.fromJson(httpRequest(Mojang.SESSION_SERVER + URLEncoder.encode(uniqueId.replace("-", ""), "UTF-8")), Mojang.Profile.class);
+                SkinData skin;
+                if((skin = SKIN_CACHE.stream().filter(skinData -> skinData.getSkinOwnerName().equalsIgnoreCase(playerName) || skinData.getSkinOwnerUniqueId().equals(uniqueId)).findAny().orElse(null)) == null) {
+                    final SessionProfile profile = Mojang.SESSION_SERVER.request(uniqueId.replace("-", ""));
                     if(profile.isError())
                         return SkinResponse.NOT_FOUND;
 
@@ -67,13 +61,14 @@ public class SkinAPI {
                             skinOwnerUniqueId(uniqueId).
                             serializedImage(getSkinByTexture(texture).join()).
                             build();
-                    SKIN_CACHE.add(skin);
-                } catch(Throwable throwable) {
-                    throw new CompletionException(throwable);
-                }
-            }
 
-            return SkinResponse.of(skin);
+                    SKIN_CACHE.add(skin);
+                }
+
+                return SkinResponse.of(skin);
+            } catch(Throwable cause) {
+                throw Heads.EXCEPTION;
+            }
         });
     }
 
@@ -84,25 +79,6 @@ public class SkinAPI {
 
     public static String fromBase64(String base64Texture) {
         return GSON.fromJson(new String(Base64.getDecoder().decode(base64Texture)), Mojang.DecodedTexturesProperty.class).getTextures().get("SKIN").getUrl();
-    }
-
-    private static String httpRequest(String urlSpec) throws IOException {
-        final HttpURLConnection connection = (HttpURLConnection) new URL(urlSpec).openConnection();
-        connection.setRequestProperty("User-Agent", "Chrome");
-
-        String content = "{}";
-        if(connection.getResponseCode() == 200) {
-            try(final InputStream inputStream = connection.getInputStream()) {
-                final StringBuilder builder = new StringBuilder();
-                final byte[] bytes = new byte[1024 * 1024];
-                for(int read; (read = inputStream.read(bytes)) > 0; )
-                    builder.append(new String(Arrays.copyOf(bytes, read), StandardCharsets.UTF_8));
-                content = builder.toString();
-            }
-        }
-
-        connection.disconnect();
-        return content;
     }
 
     public static ScheduledFuture<SerializedImage> getSkinByTexture(String texture) {

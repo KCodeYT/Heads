@@ -20,18 +20,30 @@ public class SkullOwner {
         return new SkullOwner(id, name, texture);
     }
 
+    public static CompoundTag buildTag(String texture) {
+        return SkullOwner.buildTag(null, null, texture);
+    }
+
+    public static CompoundTag buildTag(String id, String texture) {
+        return SkullOwner.buildTag(id, null, texture);
+    }
+
+    public static CompoundTag buildTag(String id, String name, String texture) {
+        final CompoundTag compoundTag = new CompoundTag("Owner").
+                putCompound("Properties", new CompoundTag().putList(new ListTag<>("textures").add(new CompoundTag().putString("Value", texture))));
+        if(id != null)
+            compoundTag.putString("Id", id);
+        if(name != null)
+            compoundTag.putString("Name", name);
+        return compoundTag;
+    }
+
     private final String id;
     private final String name;
     private final String texture;
 
     public CompoundTag toCompoundTag() {
-        final CompoundTag compoundTag = new CompoundTag("Owner").
-                putCompound("Properties", new CompoundTag().putList(new ListTag<>("textures").add(new CompoundTag().putString("Value", this.texture))));
-        if(this.id != null)
-            compoundTag.putString("Id", this.id);
-        if(this.name != null)
-            compoundTag.putString("Name", this.name);
-        return compoundTag;
+        return SkullOwner.buildTag(this.id, this.name, this.texture);
     }
 
 }

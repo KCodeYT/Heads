@@ -18,8 +18,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class SkinUtil {
 
-    public static final String PLACED_SKULL_GEOMETRY = "{\"format_version\":\"1.12.0\",\"minecraft:geometry\":[{\"description\":{\"identifier\":\"geometry.heads.placed\",\"texture_width\":64,\"texture_height\":64,\"visible_bounds_width\":2,\"visible_bounds_height\":1,\"visible_bounds_offset\":[0,0,0]},\"bones\":[{\"name\":\"head\",\"pivot\":[0,24,0],\"cubes\":[{\"origin\":[-4,0,-4],\"size\":[8,8,8],\"uv\":[0,0]}]},{\"name\":\"hat\",\"parent\":\"head\",\"pivot\":[0,24,0],\"cubes\":[{\"origin\":[-4,0,-4],\"size\":[8,8,8],\"inflate\":0.2,\"uv\":[32,0]}]}]}]}";
-    public static final String PLACED_SKULL_GEOMETRY_NAME = "geometry.heads.placed";
+    public static final String PLACED_SKULL_GEOMETRY = "{\"format_version\":\"1.12.0\",\"minecraft:geometry\":[{\"description\":{\"identifier\":\"geometry.custom.skullEntity\",\"texture_width\":64,\"texture_height\":64,\"visible_bounds_width\":2,\"visible_bounds_height\":1,\"visible_bounds_offset\":[0,0,0]},\"bones\":[{\"name\":\"head\",\"pivot\":[0,24,0],\"cubes\":[{\"origin\":[-4,0,-4],\"size\":[8,8,8],\"uv\":[0,0]}]},{\"name\":\"hat\",\"parent\":\"head\",\"pivot\":[0,24,0],\"cubes\":[{\"origin\":[-4,0,-4],\"size\":[8,8,8],\"inflate\":0.2,\"uv\":[32,0]}]}]}]}";
+    public static final String PLACED_SKULL_GEOMETRY_NAME = "geometry.custom.skullEntity";
 
     private static final Map<String, SerializedImage> SKINS = new ConcurrentHashMap<>();
     private static final PluginHolder PLUGIN_HOLDER = new PluginHolder();
@@ -29,15 +29,14 @@ public class SkinUtil {
             return ScheduledFuture.completed(SKINS.get(texture));
         final Heads heads = PLUGIN_HOLDER.get();
         final boolean saveSkinCache = heads != null && heads.getConfig().getBoolean("save-skin-cache");
-        final String skinCacheFolderStr = saveSkinCache ? heads.getConfig().getString("skin-cache-folder") : null;
-        final File skinCacheFolder = skinCacheFolderStr == null ? null : new File(skinCacheFolderStr);
+        final File skinCacheFolder = saveSkinCache ? new File(heads.getConfig().getString("skin-cache-folder")) : null;
         if(skinCacheFolder != null && !skinCacheFolder.exists() && !skinCacheFolder.mkdirs())
             Server.getInstance().getLogger().warning("Could not create skin cache folder!");
 
         return ScheduledFuture.supplyAsync(() -> {
             final String textureUrl = SkinAPI.fromBase64(texture);
             if(!textureUrl.startsWith(Mojang.TEXTURES))
-                throw new CompletionException(new RuntimeException());
+                throw Heads.EXCEPTION;
 
             final String textureId = textureUrl.substring(Mojang.TEXTURES.length());
             final File textureFile;

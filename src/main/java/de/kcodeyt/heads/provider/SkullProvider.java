@@ -9,34 +9,51 @@ import cn.nukkit.nbt.tag.ListTag;
 import cn.nukkit.utils.SerializedImage;
 import de.kcodeyt.heads.blockentity.BlockEntitySkull;
 import de.kcodeyt.heads.entity.EntitySkull;
+import de.kcodeyt.heads.util.SkinUtil;
+import de.kcodeyt.heads.util.SkullOwner;
 
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 public class SkullProvider {
 
-    public static EntitySkull createSkullEntity(SerializedImage image, BlockEntitySkull blockEntitySkull) {
-        //noinspection deprecation
-        final BlockFace blockFace = BlockFace.fromIndex(blockEntitySkull.getBlock().getDamage());
+    private static final Map<String, CompoundTag> SKIN_TAG_CACHE = new HashMap<>();
+
+    public static EntitySkull createSkullEntity(SerializedImage image, BlockEntitySkull skull) {
+        final BlockFace blockFace = BlockFace.fromIndex(skull.getBlock().getDamage());
         if(blockFace == BlockFace.DOWN)
             return null;
-        Location location = Location.fromObject(blockEntitySkull.add(0.5, -0.00735, 0.5));
-        location.yaw = blockFace == BlockFace.UP ? (blockEntitySkull.namedTag.getByte("Rot") * 22.5 + 180) % 360 : blockFace.getHorizontalIndex() * 90;
+        Location location = Location.fromObject(skull.add(0.5, -0.00735, 0.5));
+        location.yaw = blockFace == BlockFace.UP ? (skull.namedTag.getByte("Rot") * 22.5 + 180) % 360 : blockFace.getHorizontalIndex() * 90;
         if(blockFace != BlockFace.UP)
             location = location.add(blockFace.getUnitVector().multiply(-0.23895).add(0, 0.25, 0));
 
-        final EntitySkull entitySkull = new EntitySkull(
-                blockEntitySkull.getChunk(),
-                Entity.getDefaultNBT(location).
-                        putCompound("Skin", new CompoundTag().
-                                putString("ModelId", UUID.randomUUID().toString()).
-                                putByteArray("Data", image.data)).
-                        putCompound("SkullOwner", blockEntitySkull.namedTag.getCompound("Owner")).
-                        putList(new ListTag<>("BoundBlock").
-                                add(new IntTag("x", blockEntitySkull.getFloorX())).
-                                add(new IntTag("y", blockEntitySkull.getFloorY())).
-                                add(new IntTag("z", blockEntitySkull.getFloorZ()))));
+        final EntitySkull entitySkull = new EntitySkull(skull.getChunk(), Entity.getDefaultNBT(location).
+                putCompound("Skin", SkullProvider.getOrCreateSkinTag(image, skull)).
+                putCompound("SkullOwner", skull.namedTag.getCompound("Owner")).
+                putList(new ListTag<>("BoundBlock").
+                        add(new IntTag("x", skull.getFloorX())).
+                        add(new IntTag("y", skull.getFloorY())).
+                        add(new IntTag("z", skull.getFloorZ()))));
         entitySkull.spawnToAll();
         return entitySkull;
+    }
+
+    private static CompoundTag getOrCreateSkinTag(SerializedImage image, BlockEntitySkull blockEntitySkull) {
+        final SkullOwner skullOwner = blockEntitySkull.getSkullOwner();
+        final String skullId = skullOwner.getId();
+        final String texture = skullOwner.getTexture();
+        return SKIN_TAG_CACHE.computeIfAbsent(texture, s -> new CompoundTag().
+                putString("ModelId", skullId == null ? UUID.randomUUID().toString() : skullId).
+                putString("GeometryName", SkinUtil.PLACED_SKULL_GEOMETRY_NAME).
+                putByteArray("GeometryData", SkinUtil.PLACED_SKULL_GEOMETRY.getBytes(StandardCharsets.UTF_8)).
+                putByteArray("Data", image.data).
+                putBoolean("PremiumSkin", false).
+                putBoolean("PersonaSkin", false).
+                putBoolean("CapeOnClassicSkin", false).
+                putBoolean("IsTrustedSkin", true));
     }
 
 }

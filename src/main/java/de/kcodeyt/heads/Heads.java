@@ -20,12 +20,12 @@ import de.kcodeyt.heads.util.api.SkinAPI;
 import de.kcodeyt.heads.util.api.SkinData;
 
 import java.lang.reflect.Field;
-import java.util.concurrent.CompletionException;
 
 public class Heads extends PluginBase {
 
+    public static final RuntimeException EXCEPTION = new RuntimeException();
+
     @Override
-    @SuppressWarnings("deprecation")
     public void onLoad() {
         final Config config = this.getConfig();
         config.reload();
@@ -44,6 +44,7 @@ public class Heads extends PluginBase {
         Block.list[Block.SKULL_BLOCK] = BlockSkull.class;
         int dataBits;
         try {
+            //noinspection JavaReflectionMemberAccess
             final Field dataBitsField = Block.class.getDeclaredField("DATA_BITS");
             dataBits = (int) dataBitsField.get(null);
         } catch(NoSuchFieldException | IllegalAccessException e) {
@@ -67,7 +68,7 @@ public class Heads extends PluginBase {
                         final SkinData skinData = skinResponse.getSkinData();
                         return new ItemResult(Heads.createItemByOwner(new SkullOwner(skinData.getSkinOwnerUniqueId(), skinData.getSkinOwnerName(), skinData.getTexture())), skinData.getSkinOwnerName());
                     }
-                    throw new CompletionException(new Throwable());
+                    throw EXCEPTION;
                 });
             case TEXTURE:
                 return ScheduledFuture.completed(new ItemResult(Heads.createItemByOwner(new SkullOwner(input.getUniqueId(), null, input.getTexture())), null));

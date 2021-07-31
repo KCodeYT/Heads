@@ -5,7 +5,6 @@ import cn.nukkit.block.Block;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityHuman;
 import cn.nukkit.entity.data.EntityMetadata;
-import cn.nukkit.entity.data.Skin;
 import cn.nukkit.event.entity.EntityDamageByEntityEvent;
 import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.item.Item;
@@ -17,14 +16,17 @@ import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.nbt.tag.IntTag;
 import cn.nukkit.nbt.tag.ListTag;
 import cn.nukkit.network.protocol.SetEntityDataPacket;
-import de.kcodeyt.heads.util.SkinUtil;
 
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public class EntitySkull extends EntityHuman {
 
-    private static final float SCALE = 1.068f;
+    private static final CompoundTag EMPTY_COMPOUND = new CompoundTag();
+    private static final Vector3 EMPTY_VECTOR = new Vector3();
+    private static final AxisAlignedBB EMPTY_BOUNDING_BOX = new SimpleAxisAlignedBB(EMPTY_VECTOR, EMPTY_VECTOR);
+    private static final Item[] EMPTY_ITEMS_ARRAY = new Item[0];
+
+    private static final float SCALE = 1.068f + 0.06f;
 
     private final Vector3 boundBlock;
     private final SetEntityDataPacket packet;
@@ -48,7 +50,7 @@ public class EntitySkull extends EntityHuman {
 
     @Override
     public AxisAlignedBB getBoundingBox() {
-        return new SimpleAxisAlignedBB(new Vector3(), new Vector3());
+        return EMPTY_BOUNDING_BOX;
     }
 
     @Override
@@ -56,15 +58,8 @@ public class EntitySkull extends EntityHuman {
         super.initEntity();
         this.setMaxHealth(1);
         this.setScale(SCALE);
-        this.dataProperties.putFloat(Entity.DATA_BOUNDING_BOX_HEIGHT, this.getHeight());
-        this.dataProperties.putFloat(Entity.DATA_BOUNDING_BOX_WIDTH, this.getWidth());
-
-        final Skin headSkin = new Skin();
-        headSkin.setGeometryName(SkinUtil.PLACED_SKULL_GEOMETRY_NAME);
-        headSkin.setGeometryData(SkinUtil.PLACED_SKULL_GEOMETRY);
-        headSkin.setSkinData(this.skin.getSkinData());
-        headSkin.setSkinId(UUID.randomUUID().toString());
-        this.setSkin(headSkin);
+        this.dataProperties.putFloat(Entity.DATA_BOUNDING_BOX_HEIGHT, 0f);
+        this.dataProperties.putFloat(Entity.DATA_BOUNDING_BOX_WIDTH, 0f);
     }
 
     @Override
@@ -85,7 +80,7 @@ public class EntitySkull extends EntityHuman {
 
     @Override
     public Item[] getDrops() {
-        return new Item[0];
+        return EMPTY_ITEMS_ARRAY;
     }
 
     @Override
@@ -97,7 +92,7 @@ public class EntitySkull extends EntityHuman {
 
     @Override
     public void saveNBT() {
-        this.namedTag = new CompoundTag();
+        this.namedTag = EMPTY_COMPOUND;
     }
 
     @Override
