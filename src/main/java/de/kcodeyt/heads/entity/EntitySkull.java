@@ -4,7 +4,6 @@ import cn.nukkit.Player;
 import cn.nukkit.block.Block;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityHuman;
-import cn.nukkit.entity.data.EntityMetadata;
 import cn.nukkit.event.entity.EntityDamageByEntityEvent;
 import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.item.Item;
@@ -15,8 +14,10 @@ import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.nbt.tag.IntTag;
 import cn.nukkit.nbt.tag.ListTag;
-import cn.nukkit.network.protocol.SetEntityDataPacket;
+import de.kcodeyt.heads.provider.SkullProvider;
+import de.kcodeyt.heads.util.SkullPackets;
 
+import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 public class EntitySkull extends EntityHuman {
@@ -26,10 +27,9 @@ public class EntitySkull extends EntityHuman {
     private static final AxisAlignedBB EMPTY_BOUNDING_BOX = new SimpleAxisAlignedBB(EMPTY_VECTOR, EMPTY_VECTOR);
     private static final Item[] EMPTY_ITEMS_ARRAY = new Item[0];
 
-    private static final float SCALE = 1.068f + 0.06f;
-
     private final Vector3 boundBlock;
-    private final SetEntityDataPacket packet;
+    private final SkullPackets skullPackets;
+
     private int closeTimer;
 
     public EntitySkull(FullChunk chunk, CompoundTag nbt) {
@@ -41,11 +41,7 @@ public class EntitySkull extends EntityHuman {
                 boundBlock.get(1).getData(),
                 boundBlock.get(2).getData()
         ) : this.getLevelBlock();
-        this.packet = new SetEntityDataPacket();
-        this.packet.eid = this.id;
-        this.packet.metadata = new EntityMetadata();
-        this.dataProperties.getMap().forEach((key, data) -> this.packet.metadata.put(data));
-        this.setDataFlag(Entity.DATA_FLAGS, Entity.DATA_FLAG_INVISIBLE, true);
+        this.skullPackets = new SkullPackets(this);
     }
 
     @Override
@@ -57,7 +53,7 @@ public class EntitySkull extends EntityHuman {
     protected void initEntity() {
         super.initEntity();
         this.setMaxHealth(1);
-        this.setScale(SCALE);
+        this.setScale(SkullProvider.getSkullScale());
         this.dataProperties.putFloat(Entity.DATA_BOUNDING_BOX_HEIGHT, 0f);
         this.dataProperties.putFloat(Entity.DATA_BOUNDING_BOX_WIDTH, 0f);
     }
@@ -85,9 +81,16 @@ public class EntitySkull extends EntityHuman {
 
     @Override
     public void spawnTo(Player player) {
-        super.spawnTo(player);
-        this.level.addPlayerMovement(this, this.x, this.y + this.getBaseOffset(), this.z, this.yaw, this.pitch, this.yaw);
-        this.server.getScheduler().scheduleDelayedTask(null, () -> player.dataPacket(this.packet), 3);
+        if(this.distance(player) > 32) return;
+        if(this.hasSpawned.containsKey(player.getLoaderId())) return;
+        this.hasSpawned.put(player.getLoaderId(), player);
+        this.skullPackets.spawnTo(player);
+    }
+
+    @Override
+    public void despawnFrom(Player player) {
+        if(this.hasSpawned.remove(player.getLoaderId()) == null) return;
+        this.skullPackets.despawnFrom(player);
     }
 
     @Override
@@ -112,6 +115,10 @@ public class EntitySkull extends EntityHuman {
 
     @Override
     public boolean entityBaseTick(int tickDiff) {
+        for(Player player : new ArrayList<>(this.hasSpawned.values()))
+            if(this.distance(player) > 32) this.despawnFrom(player);
+        this.spawnToAll();
+
         if(this.level.getBlock(this.boundBlock).getId() != Block.SKULL_BLOCK) {
             if(this.closeTimer++ > 2) {
                 this.close();

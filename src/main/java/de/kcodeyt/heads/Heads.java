@@ -12,10 +12,7 @@ import de.kcodeyt.heads.blockentity.BlockEntitySkull;
 import de.kcodeyt.heads.command.DebugHeadCommand;
 import de.kcodeyt.heads.entity.EntitySkull;
 import de.kcodeyt.heads.listener.EventListener;
-import de.kcodeyt.heads.util.HeadInput;
-import de.kcodeyt.heads.util.ItemResult;
-import de.kcodeyt.heads.util.ScheduledFuture;
-import de.kcodeyt.heads.util.SkullOwner;
+import de.kcodeyt.heads.util.*;
 import de.kcodeyt.heads.util.api.SkinAPI;
 import de.kcodeyt.heads.util.api.SkinData;
 
@@ -29,6 +26,10 @@ public class Heads extends PluginBase {
     public void onLoad() {
         final Config config = this.getConfig();
         config.reload();
+        if(!config.exists("skull-scale")) {
+            config.set("skull-scale", "VANILLA");
+            config.save();
+        }
         if(!config.exists("save-skin-cache")) {
             config.set("save-skin-cache", true);
             config.save();
@@ -58,6 +59,7 @@ public class Heads extends PluginBase {
     public void onEnable() {
         this.getServer().getPluginManager().registerEvents(new EventListener(), this);
         this.getServer().getCommandMap().register("heads", new DebugHeadCommand());
+        PluginHolder.init(this);
     }
 
     public static ScheduledFuture<ItemResult> createItem(HeadInput input) {
@@ -77,10 +79,14 @@ public class Heads extends PluginBase {
     }
 
     public static Item createItemByOwner(SkullOwner skullOwner) {
-        final Item item = Item.get(Item.SKULL, 3, 1).setNamedTag(new CompoundTag().putCompound("SkullOwner", skullOwner.toCompoundTag()));
+        final Item item = Heads.createItemByType(3).setNamedTag(new CompoundTag().putCompound("SkullOwner", skullOwner.toCompoundTag()));
         if(skullOwner.getName() != null)
             item.setCustomName("§r§f" + skullOwner.getName() + "'s Head");
         return item;
+    }
+
+    public static Item createItemByType(int skullType) {
+        return Item.get(Item.SKULL, skullType, 1);
     }
 
 }

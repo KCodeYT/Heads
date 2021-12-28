@@ -24,8 +24,8 @@ public class EventListener implements Listener {
 
         if(item.hasCustomBlockData() && blockEntity instanceof BlockEntitySkull) {
             final SkullOwner skullOwner = ((BlockEntitySkull) blockEntity).getSkullOwner();
-            if(skullOwner != null)
-                event.setItem(Heads.createItemByOwner(skullOwner));
+            if(skullOwner != null) event.setItem(Heads.createItemByOwner(skullOwner));
+            else event.setItem(Heads.createItemByType(((BlockEntitySkull) blockEntity).getSkullType()));
         }
     }
 

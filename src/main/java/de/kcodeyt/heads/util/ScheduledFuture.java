@@ -24,6 +24,7 @@ public class ScheduledFuture<V> {
 
     private final Queue<BiConsumer<V, Exception>> syncQueue;
     private final Queue<BiConsumer<V, Exception>> asyncQueue;
+    private final Object sync;
 
     private final ServerScheduler scheduler;
     private final Runnable task;
@@ -35,6 +36,7 @@ public class ScheduledFuture<V> {
     private ScheduledFuture(Supplier<V> supplier, boolean canBeNull) {
         this.syncQueue = new ConcurrentLinkedDeque<>();
         this.asyncQueue = new ConcurrentLinkedDeque<>();
+        this.sync = new Object();
 
         this.scheduler = Server.getInstance().getScheduler();
         if(supplier != null) {
@@ -63,6 +65,9 @@ public class ScheduledFuture<V> {
             this.state = COMPLETED;
             this.value = value;
             this.exception = e;
+            synchronized(this.sync) {
+                this.sync.notifyAll();
+            }
             if(Server.getInstance().isPrimaryThread()) {
                 this.runSyncQueue(value, e);
                 this.scheduler.scheduleTask(null, () -> this.runAsyncQueue(value, e), true);
@@ -115,8 +120,10 @@ public class ScheduledFuture<V> {
     }
 
     public V join() throws Exception {
-        //noinspection StatementWithEmptyBody
-        while(this.state != COMPLETED) ;
+        if(this.state == WAITING)
+            synchronized(this.sync) {
+                this.sync.wait();
+            }
         if(this.exception != null)
             throw this.exception;
         return this.value;

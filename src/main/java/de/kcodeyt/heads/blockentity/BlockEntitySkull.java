@@ -20,8 +20,7 @@ public class BlockEntitySkull extends cn.nukkit.blockentity.BlockEntitySkull {
 
     @Override
     protected void initBlockEntity() {
-        if(!this.isBlockEntityValid())
-            return;
+        if(!this.isBlockEntityValid()) return;
 
         final CompoundTag skullOwnerTag = this.namedTag.getCompound("SkullOwner");
         final CompoundTag ownerTag = this.namedTag.getCompound("Owner");
@@ -33,18 +32,16 @@ public class BlockEntitySkull extends cn.nukkit.blockentity.BlockEntitySkull {
         }
 
         super.initBlockEntity();
-        if(this.skullOwner == null)
-            return;
+        if(this.skullOwner == null) return;
 
         this.namedTag.putCompound("Owner", this.skullOwner.toCompoundTag());
         this.namedTag.putByte("SkullType", 3);
 
         SkinAPI.getSkinByTexture(this.skullOwner.getTexture()).
                 whenComplete((serializedImage, throwable) -> {
-                    if(this.closed)
-                        return;
-                    if(serializedImage != null)
-                        this.entitySkull = SkullProvider.createSkullEntity(serializedImage, this);
+                    if(this.closed) return;
+
+                    if(serializedImage != null) this.entitySkull = SkullProvider.createSkullEntity(serializedImage, this);
                     else {
                         this.namedTag.remove("Owner");
                         this.skullOwner = null;
@@ -52,15 +49,13 @@ public class BlockEntitySkull extends cn.nukkit.blockentity.BlockEntitySkull {
                 });
     }
 
-    @Override
-    public CompoundTag getCleanedNBT() {
-        return super.getCleanedNBT().remove("Rot");
+    public int getSkullType() {
+        return this.namedTag.getByte("SkullType");
     }
 
     @Override
     public void close() {
-        if(this.entitySkull != null)
-            this.entitySkull.close();
+        if(this.entitySkull != null) this.entitySkull.close();
         super.close();
     }
 

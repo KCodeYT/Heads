@@ -22,12 +22,11 @@ public class SkinUtil {
     public static final String PLACED_SKULL_GEOMETRY_NAME = "geometry.custom.skullEntity";
 
     private static final Map<String, SerializedImage> SKINS = new ConcurrentHashMap<>();
-    private static final PluginHolder PLUGIN_HOLDER = new PluginHolder();
 
     public static ScheduledFuture<SerializedImage> base64Texture(String texture) {
         if(SKINS.containsKey(texture))
             return ScheduledFuture.completed(SKINS.get(texture));
-        final Heads heads = PLUGIN_HOLDER.get();
+        final Heads heads = PluginHolder.get();
         final boolean saveSkinCache = heads != null && heads.getConfig().getBoolean("save-skin-cache");
         final File skinCacheFolder = saveSkinCache ? new File(heads.getConfig().getString("skin-cache-folder")) : null;
         if(skinCacheFolder != null && !skinCacheFolder.exists() && !skinCacheFolder.mkdirs())
@@ -76,17 +75,6 @@ public class SkinUtil {
                 throw new CompletionException(throwable);
             }
         });
-    }
-
-    private static final class PluginHolder {
-        private Heads plugin;
-
-        private Heads get() {
-            if(this.plugin == null)
-                this.plugin = (Heads) Server.getInstance().getPluginManager().getPlugins().values().stream().
-                        filter(plugin -> plugin instanceof Heads).findAny().orElse(null);
-            return this.plugin;
-        }
     }
 
 }

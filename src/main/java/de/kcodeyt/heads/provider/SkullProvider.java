@@ -7,10 +7,13 @@ import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.nbt.tag.IntTag;
 import cn.nukkit.nbt.tag.ListTag;
 import cn.nukkit.utils.SerializedImage;
+import de.kcodeyt.heads.Heads;
 import de.kcodeyt.heads.blockentity.BlockEntitySkull;
 import de.kcodeyt.heads.entity.EntitySkull;
+import de.kcodeyt.heads.util.PluginHolder;
 import de.kcodeyt.heads.util.SkinUtil;
 import de.kcodeyt.heads.util.SkullOwner;
+import de.kcodeyt.heads.util.SkullScale;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -54,6 +57,19 @@ public class SkullProvider {
                 putBoolean("PersonaSkin", false).
                 putBoolean("CapeOnClassicSkin", false).
                 putBoolean("IsTrustedSkin", true));
+    }
+
+    public static float getSkullScale() {
+        SkullScale skullScale = SkullScale.VANILLA;
+        final Heads plugin = PluginHolder.get();
+        if(plugin != null) {
+            try {
+                skullScale = SkullScale.valueOf(plugin.getConfig().getString("skull-scale"));
+            } catch(IllegalArgumentException ignored) {
+            }
+        }
+
+        return skullScale.getValue();
     }
 
 }
