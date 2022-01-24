@@ -81,7 +81,7 @@ public class EntitySkull extends EntityHuman {
 
     @Override
     public void spawnTo(Player player) {
-        if(this.distance(player) > 32) return;
+        if(this.distance(player) > 64) return;
         if(this.hasSpawned.containsKey(player.getLoaderId())) return;
         this.hasSpawned.put(player.getLoaderId(), player);
         this.skullPackets.spawnTo(player);
@@ -116,7 +116,7 @@ public class EntitySkull extends EntityHuman {
     @Override
     public boolean entityBaseTick(int tickDiff) {
         for(Player player : new ArrayList<>(this.hasSpawned.values()))
-            if(this.distance(player) > 32) this.despawnFrom(player);
+            if(this.distance(player) > 64) this.despawnFrom(player);
         this.spawnToAll();
 
         if(this.level.getBlock(this.boundBlock).getId() != Block.SKULL_BLOCK) {

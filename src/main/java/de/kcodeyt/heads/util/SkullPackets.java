@@ -14,6 +14,7 @@ public class SkullPackets {
     private final SetEntityDataPacket setEntityDataPacket;
     private final AddPlayerPacket addPlayerPacket;
     private final PlayerListPacket removeFromListPacket;
+    private final MovePlayerPacket movePlayerPacket;
     private final RemoveEntityPacket removeEntityPacket;
 
     public SkullPackets(EntitySkull entitySkull) {
@@ -52,6 +53,15 @@ public class SkullPackets {
         this.removeFromListPacket.type = PlayerListPacket.TYPE_REMOVE;
         this.removeFromListPacket.entries = new PlayerListPacket.Entry[]{new PlayerListPacket.Entry(entitySkull.getUniqueId())};
 
+        this.movePlayerPacket = new MovePlayerPacket();
+        this.movePlayerPacket.eid = entitySkull.getId();
+        this.movePlayerPacket.x = (float) entitySkull.x;
+        this.movePlayerPacket.y = (float) entitySkull.y + 1.62F;
+        this.movePlayerPacket.z = (float) entitySkull.z;
+        this.movePlayerPacket.yaw = (float) entitySkull.yaw;
+        this.movePlayerPacket.headYaw = (float) entitySkull.yaw;
+        this.movePlayerPacket.pitch = (float) entitySkull.pitch;
+
         this.removeEntityPacket = new RemoveEntityPacket();
         this.removeEntityPacket.eid = entitySkull.getId();
     }
@@ -59,7 +69,9 @@ public class SkullPackets {
     public void spawnTo(Player player) {
         player.dataPacket(this.addToListPacket);
         player.dataPacket(this.addPlayerPacket);
+        player.dataPacket(this.movePlayerPacket);
         player.dataPacket(this.removeFromListPacket);
+
         player.getServer().getScheduler().scheduleDelayedTask(null, () -> {
             if(this.entitySkull.getViewers().containsKey(player.getLoaderId()))
                 player.dataPacket(this.setEntityDataPacket);
