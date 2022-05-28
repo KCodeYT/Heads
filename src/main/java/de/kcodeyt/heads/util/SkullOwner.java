@@ -18,21 +18,25 @@ package de.kcodeyt.heads.util;
 
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.nbt.tag.ListTag;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Value;
 
-@Getter
-@AllArgsConstructor
+@Value
 public class SkullOwner {
 
     public static SkullOwner fromCompoundTag(CompoundTag compoundTag) {
-        if(!compoundTag.contains("Properties") || !(compoundTag.get("Properties") instanceof CompoundTag))
-            return null;
         final String id = compoundTag.contains("Id") ? compoundTag.getString("Id") : null;
         final String name = compoundTag.contains("Name") ? compoundTag.getString("Name") : null;
+
+        if(!compoundTag.contains("Properties") || !(compoundTag.get("Properties") instanceof CompoundTag)) {
+            if(id == null && name == null) return null;
+
+            return new SkullOwner(id, name, null);
+        }
+
         final CompoundTag properties = compoundTag.getCompound("Properties");
         final ListTag<CompoundTag> textures = properties.getList("textures", CompoundTag.class);
         final String texture = textures.get(0).getString("Value");
+
         return new SkullOwner(id, name, texture);
     }
 
@@ -45,18 +49,18 @@ public class SkullOwner {
     }
 
     public static CompoundTag buildTag(String id, String name, String texture) {
-        final CompoundTag compoundTag = new CompoundTag("Owner").
-                putCompound("Properties", new CompoundTag().putList(new ListTag<>("textures").add(new CompoundTag().putString("Value", texture))));
-        if(id != null)
-            compoundTag.putString("Id", id);
-        if(name != null)
-            compoundTag.putString("Name", name);
+        final CompoundTag compoundTag = new CompoundTag("Owner");
+        if(texture != null) compoundTag.putCompound("Properties", new CompoundTag().
+                putList(new ListTag<>("textures").add(new CompoundTag().
+                        putString("Value", texture))));
+        if(id != null) compoundTag.putString("Id", id);
+        if(name != null) compoundTag.putString("Name", name);
         return compoundTag;
     }
 
-    private final String id;
-    private final String name;
-    private final String texture;
+    String id;
+    String name;
+    String texture;
 
     public CompoundTag toCompoundTag() {
         return SkullOwner.buildTag(this.id, this.name, this.texture);

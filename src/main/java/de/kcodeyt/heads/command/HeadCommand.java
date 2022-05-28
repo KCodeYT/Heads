@@ -22,11 +22,11 @@ import cn.nukkit.command.CommandSender;
 import de.kcodeyt.heads.Heads;
 import de.kcodeyt.heads.util.HeadInput;
 
-public class DebugHeadCommand extends Command {
+public class HeadCommand extends Command {
 
-    public DebugHeadCommand() {
-        super("debughead", "Command to give a player head", "/debughead <name>");
-        this.setPermission("heads.command.debughead");
+    public HeadCommand() {
+        super("head", "Gives yourself a player head", "/head <skull owner>");
+        this.setPermission("heads.command.head");
     }
 
     @Override
@@ -45,9 +45,24 @@ public class DebugHeadCommand extends Command {
             return false;
         }
 
-        Heads.createItem(HeadInput.ofPlayer(String.join(" ", args))).whenComplete((result, throwable) -> {
-            if(throwable != null) {
-                player.sendMessage("§cPlayer not found!");
+        final String skullOwner = String.join(" ", args);
+
+        Heads.createItem(HeadInput.ofLocal(skullOwner)).whenComplete((result, throwable) -> {
+            if(result == null || throwable != null) {
+                if(skullOwner.contains(" ")) {
+                    player.sendMessage("§cPlayer not found!");
+                    return;
+                }
+
+                Heads.createItem(HeadInput.ofPlayer(skullOwner)).whenComplete((otherResult, otherThrowable) -> {
+                    if(otherResult == null || otherThrowable != null) {
+                        player.sendMessage("§cPlayer not found!");
+                        return;
+                    }
+
+                    player.getInventory().addItem(otherResult.getItem());
+                    player.sendMessage("§aGave you the player head of " + otherResult.getName() + "!");
+                });
                 return;
             }
 

@@ -18,11 +18,15 @@ package de.kcodeyt.heads.util;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Value;
 
-@Getter
+@Value
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class HeadInput {
+
+    public static HeadInput ofLocal(String name) {
+        return new HeadInput(Type.LOCAL, name, null, null);
+    }
 
     public static HeadInput ofPlayer(String name) {
         return new HeadInput(Type.PLAYER, name, null, null);
@@ -33,13 +37,14 @@ public class HeadInput {
     }
 
     public enum Type {
+        LOCAL,
         PLAYER,
         TEXTURE
     }
 
-    private final Type type;
-    private final String name;
-    private final String texture;
-    private final String uniqueId;
+    Type type;
+    String name;
+    String texture;
+    String uniqueId;
 
 }

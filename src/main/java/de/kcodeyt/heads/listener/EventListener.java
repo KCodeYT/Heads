@@ -20,12 +20,16 @@ import cn.nukkit.Player;
 import cn.nukkit.block.Block;
 import cn.nukkit.blockentity.BlockEntity;
 import cn.nukkit.event.EventHandler;
+import cn.nukkit.event.EventPriority;
 import cn.nukkit.event.Listener;
 import cn.nukkit.event.player.PlayerBlockPickEvent;
+import cn.nukkit.event.player.PlayerChangeSkinEvent;
+import cn.nukkit.event.player.PlayerLoginEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.Level;
 import de.kcodeyt.heads.Heads;
 import de.kcodeyt.heads.blockentity.BlockEntitySkull;
+import de.kcodeyt.heads.util.LocalSkinAPI;
 import de.kcodeyt.heads.util.SkullOwner;
 
 public class EventListener implements Listener {
@@ -43,6 +47,20 @@ public class EventListener implements Listener {
             if(skullOwner != null) event.setItem(Heads.createItemByOwner(skullOwner));
             else event.setItem(Heads.createItemByType(((BlockEntitySkull) blockEntity).getSkullType()));
         }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onLogin(PlayerLoginEvent event) {
+        final Player player = event.getPlayer();
+
+        LocalSkinAPI.addOrUpdatePlayer(player.getName(), player.getSkin());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onChangeSkin(PlayerChangeSkinEvent event) {
+        final Player player = event.getPlayer();
+
+        LocalSkinAPI.addOrUpdatePlayer(player.getName(), event.getSkin());
     }
 
 }

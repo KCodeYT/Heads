@@ -20,8 +20,10 @@ import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.nbt.tag.CompoundTag;
 import de.kcodeyt.heads.entity.EntitySkull;
 import de.kcodeyt.heads.provider.SkullProvider;
+import de.kcodeyt.heads.util.LocalSkinAPI;
 import de.kcodeyt.heads.util.SkullOwner;
 import de.kcodeyt.heads.util.api.SkinAPI;
+import de.kcodeyt.heads.util.api.SkinData;
 import lombok.Getter;
 
 public class BlockEntitySkull extends cn.nukkit.blockentity.BlockEntitySkull {
@@ -53,16 +55,30 @@ public class BlockEntitySkull extends cn.nukkit.blockentity.BlockEntitySkull {
         this.namedTag.putCompound("Owner", this.skullOwner.toCompoundTag());
         this.namedTag.putByte("SkullType", 3);
 
-        SkinAPI.getSkinByTexture(this.skullOwner.getTexture()).
-                whenComplete((serializedImage, throwable) -> {
-                    if(this.closed) return;
+        if(this.skullOwner.getTexture() == null) {
+            final SkinData skinData = LocalSkinAPI.getSkinData(this.skullOwner.getId());
 
-                    if(serializedImage != null) this.entitySkull = SkullProvider.createSkullEntity(serializedImage, this);
-                    else {
-                        this.namedTag.remove("Owner");
-                        this.skullOwner = null;
-                    }
-                });
+            if(skinData == null) {
+                this.namedTag.remove("Owner");
+                this.skullOwner = null;
+                return;
+            }
+
+            this.entitySkull = SkullProvider.createSkullEntity(skinData.getSerializedImage(), this);
+        } else {
+            SkinAPI.getSkinByTexture(this.skullOwner.getTexture()).
+                    whenComplete((serializedImage, throwable) -> {
+                        if(this.closed) return;
+
+                        if(serializedImage == null || throwable != null) {
+                            this.namedTag.remove("Owner");
+                            this.skullOwner = null;
+                            return;
+                        }
+
+                        this.entitySkull = SkullProvider.createSkullEntity(serializedImage, this);
+                    });
+        }
     }
 
     public int getSkullType() {
