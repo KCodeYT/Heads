@@ -27,19 +27,32 @@ import de.kcodeyt.heads.block.BlockSkull;
 import de.kcodeyt.heads.blockentity.BlockEntitySkull;
 import de.kcodeyt.heads.command.HeadCommand;
 import de.kcodeyt.heads.entity.EntitySkull;
+import de.kcodeyt.heads.lang.Language;
 import de.kcodeyt.heads.listener.EventListener;
 import de.kcodeyt.heads.util.*;
 import de.kcodeyt.heads.util.api.SkinAPI;
 import de.kcodeyt.heads.util.api.SkinData;
+import lombok.Getter;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 
 public class Heads extends PluginBase {
 
+    private static final String DEFAULT_LANGUAGE = "en_US";
+
     public static final RuntimeException EXCEPTION = new RuntimeException();
+
+    @Getter
+    private Language language;
 
     @Override
     public void onLoad() {
+        PluginHolder.init(this);
+
         final Config config = this.getConfig();
         config.reload();
         if(!config.exists("skull-scale")) {
@@ -57,6 +70,40 @@ public class Heads extends PluginBase {
         if(!config.exists("local-skin-folder")) {
             config.set("local-skin-folder", "./local_skins/");
             config.save();
+        }
+
+        if(!config.exists("default_lang")) {
+            config.set("default_lang", DEFAULT_LANGUAGE);
+            config.save();
+        }
+
+        final File langDir = new File(this.getDataFolder(), "lang");
+        final File[] files = langDir.listFiles();
+        if(!langDir.exists() || files == null || files.length == 0) {
+            if(!langDir.exists() && !langDir.mkdirs()) {
+                this.getLogger().error("Could not create the language directory for this plugin!");
+                return;
+            }
+
+            try(final InputStreamReader inputReader = new InputStreamReader(this.getResource("lang"));
+                final BufferedReader bufferedReader = new BufferedReader(inputReader)) {
+                String line;
+                while((line = bufferedReader.readLine()) != null)
+                    this.saveResource("lang/" + line);
+            } catch(Exception e) {
+                this.getLogger().error("Could not find the language resources of this plugin!", e);
+                return;
+            }
+        }
+
+        try {
+            final String defaultLang = config.getString("default_lang");
+
+            this.language = new Language(langDir, defaultLang);
+            this.getLogger().info("This plugin is using the " + this.language.getDefaultLang() + " as default language file!");
+        } catch(IOException e) {
+            this.getLogger().error(e.getMessage(), e);
+            return;
         }
 
         Entity.registerEntity("Skull", EntitySkull.class, true);
@@ -79,7 +126,6 @@ public class Heads extends PluginBase {
     public void onEnable() {
         this.getServer().getPluginManager().registerEvents(new EventListener(), this);
         this.getServer().getCommandMap().register("heads", new HeadCommand());
-        PluginHolder.init(this);
 
         LocalSkinAPI.loadNameLookup();
     }

@@ -20,7 +20,10 @@ import cn.nukkit.Player;
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
 import de.kcodeyt.heads.Heads;
+import de.kcodeyt.heads.lang.Language;
+import de.kcodeyt.heads.lang.TranslationKey;
 import de.kcodeyt.heads.util.HeadInput;
+import de.kcodeyt.heads.util.PluginHolder;
 
 public class HeadCommand extends Command {
 
@@ -31,17 +34,18 @@ public class HeadCommand extends Command {
 
     @Override
     public boolean execute(CommandSender sender, String label, String[] args) {
+        final Language language = PluginHolder.get().getLanguage();
+
         if(!(sender instanceof Player)) {
-            sender.sendMessage("This command is only available for players!");
+            sender.sendMessage(language.translate(null, TranslationKey.CONSOLE_USES_PLAYER_COMMAND));
             return false;
         }
 
-        if(!this.testPermission(sender))
-            return false;
+        if(!this.testPermission(sender)) return false;
 
         final Player player = (Player) sender;
         if(args.length == 0) {
-            player.sendMessage("§cUsage: " + this.getUsage());
+            player.sendMessage(language.translate(player, TranslationKey.HEAD_COMMAND_USAGE, this.getUsage()));
             return false;
         }
 
@@ -50,24 +54,24 @@ public class HeadCommand extends Command {
         Heads.createItem(HeadInput.ofLocal(skullOwner)).whenComplete((result, throwable) -> {
             if(result == null || throwable != null) {
                 if(skullOwner.contains(" ")) {
-                    player.sendMessage("§cPlayer not found!");
+                    player.sendMessage(language.translate(player, TranslationKey.INVALID_NAME));
                     return;
                 }
 
                 Heads.createItem(HeadInput.ofPlayer(skullOwner)).whenComplete((otherResult, otherThrowable) -> {
                     if(otherResult == null || otherThrowable != null) {
-                        player.sendMessage("§cPlayer not found!");
+                        player.sendMessage(language.translate(player, TranslationKey.PLAYER_NOT_FOUND));
                         return;
                     }
 
                     player.getInventory().addItem(otherResult.getItem());
-                    player.sendMessage("§aGave you the player head of " + otherResult.getName() + "!");
+                    player.sendMessage(language.translate(player, TranslationKey.HEAD_GIVEN, otherResult.getName()));
                 });
                 return;
             }
 
             player.getInventory().addItem(result.getItem());
-            player.sendMessage("§aGave you the player head of " + result.getName() + "!");
+            player.sendMessage(language.translate(player, TranslationKey.HEAD_GIVEN, result.getName()));
         });
         return false;
     }
