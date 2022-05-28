@@ -27,7 +27,10 @@ import java.util.Locale;
 public enum TranslationKey {
 
     CONSOLE_USES_PLAYER_COMMAND,
-    HEAD_COMMAND_USAGE, INVALID_NAME, PLAYER_NOT_FOUND, HEAD_GIVEN;
+    HEAD_COMMAND_USAGE,
+    INVALID_NAME,
+    PLAYER_NOT_FOUND,
+    HEAD_GIVEN;
 
     @Getter
     private final String key;

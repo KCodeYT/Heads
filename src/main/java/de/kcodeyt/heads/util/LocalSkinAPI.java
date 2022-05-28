@@ -73,7 +73,14 @@ public class LocalSkinAPI {
         }
     }
 
+    private static boolean isLegacySkin(Skin skin) {
+        final int skinDataLength = skin.getSkinData().data.length;
+        return skinDataLength != 32 * 64 * 4 && skinDataLength != 64 * 64 * 4 && skinDataLength != 128 * 64 * 4 && skinDataLength != 128 * 128 * 4;
+    }
+
     public static void addOrUpdatePlayer(String name, Skin skin) {
+        if(skin.isPersona() || !isLegacySkin(skin)) return;
+
         NAME_TO_LATEST.put(name, skin.getSkinId());
 
         final SkinData skinData = SkinData.builder().

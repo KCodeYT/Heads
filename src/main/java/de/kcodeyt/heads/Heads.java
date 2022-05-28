@@ -85,11 +85,10 @@ public class Heads extends PluginBase {
                 return;
             }
 
-            try(final InputStreamReader inputReader = new InputStreamReader(this.getResource("lang"));
-                final BufferedReader bufferedReader = new BufferedReader(inputReader)) {
+            try(final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(this.getResource("lang/lang_list.txt")))) {
                 String line;
                 while((line = bufferedReader.readLine()) != null)
-                    this.saveResource("lang/" + line);
+                    this.saveResource("lang/" + line + ".txt");
             } catch(Exception e) {
                 this.getLogger().error("Could not find the language resources of this plugin!", e);
                 return;
