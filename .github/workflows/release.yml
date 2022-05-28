@@ -43,7 +43,7 @@ jobs:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
         with:
           tag_name: ${{env.VER}}
-          release_name: VanillaGenerator v${{env.VER}}
+          release_name: HeadPlugin v${{env.VER}}
 
       - name: Upload plugin as release
         uses: actions/upload-release-asset@v1
@@ -52,5 +52,5 @@ jobs:
         with:
           upload_url: ${{steps.create_release.outputs.upload_url}}
           asset_path: target/${{env.NAME}}-${{env.VER}}.jar
-          asset_name: VanillaGenerator.jar
+          asset_name: HeadPlugin.jar
           asset_content_type: application/java-archive
