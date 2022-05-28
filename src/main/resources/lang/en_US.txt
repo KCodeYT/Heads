@@ -1,0 +1,5 @@
+console-uses-player-command=&cThis command can only be used by players!
+head-command-usage=&cUsage: {0}
+invalid-name=&cInvalid name!
+player-not-found=&cThe player could not be found!
+head-given=&aGave yourself the head of&9 {0}&r&a!
