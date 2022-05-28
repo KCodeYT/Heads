@@ -25,7 +25,7 @@ import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.utils.Config;
 import de.kcodeyt.heads.block.BlockSkull;
 import de.kcodeyt.heads.blockentity.BlockEntitySkull;
-import de.kcodeyt.heads.command.DebugHeadCommand;
+import de.kcodeyt.heads.command.HeadCommand;
 import de.kcodeyt.heads.entity.EntitySkull;
 import de.kcodeyt.heads.listener.EventListener;
 import de.kcodeyt.heads.util.*;
@@ -54,6 +54,10 @@ public class Heads extends PluginBase {
             config.set("skin-cache-folder", "./skins/");
             config.save();
         }
+        if(!config.exists("local-skin-folder")) {
+            config.set("local-skin-folder", "./local_skins/");
+            config.save();
+        }
 
         Entity.registerEntity("Skull", EntitySkull.class, true);
         BlockEntity.registerBlockEntity(BlockEntity.SKULL, BlockEntitySkull.class);
@@ -74,12 +78,26 @@ public class Heads extends PluginBase {
     @Override
     public void onEnable() {
         this.getServer().getPluginManager().registerEvents(new EventListener(), this);
-        this.getServer().getCommandMap().register("heads", new DebugHeadCommand());
+        this.getServer().getCommandMap().register("heads", new HeadCommand());
         PluginHolder.init(this);
+
+        LocalSkinAPI.loadNameLookup();
+    }
+
+    @Override
+    public void onDisable() {
+        LocalSkinAPI.saveNameLookup();
     }
 
     public static ScheduledFuture<ItemResult> createItem(HeadInput input) {
         switch(input.getType()) {
+            case LOCAL:
+                final String skinId = LocalSkinAPI.getLatestSkinId(input.getName());
+                if(skinId == null) return ScheduledFuture.completed(null);
+
+                final String originalName = LocalSkinAPI.getPlayerName(skinId);
+
+                return ScheduledFuture.completed(new ItemResult(Heads.createItemByOwner(new SkullOwner(skinId, originalName, null)), originalName));
             case PLAYER:
                 return SkinAPI.getSkin(input.getName()).thenApply(skinResponse -> {
                     if(skinResponse.isSuccess()) {

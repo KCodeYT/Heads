@@ -42,8 +42,8 @@ public class SkullProvider {
 
     public static EntitySkull createSkullEntity(SerializedImage image, BlockEntitySkull skull) {
         final BlockFace blockFace = BlockFace.fromIndex(skull.getBlock().getDamage());
-        if(blockFace == BlockFace.DOWN)
-            return null;
+        if(blockFace == BlockFace.DOWN) return null;
+
         Location location = Location.fromObject(skull.add(0.5, -0.00735, 0.5));
         location.yaw = blockFace == BlockFace.UP ? (skull.namedTag.getByte("Rot") * 22.5 + 180) % 360 : blockFace.getHorizontalIndex() * 90;
         if(blockFace != BlockFace.UP)
@@ -64,7 +64,7 @@ public class SkullProvider {
         final SkullOwner skullOwner = blockEntitySkull.getSkullOwner();
         final String skullId = skullOwner.getId();
         final String texture = skullOwner.getTexture();
-        return SKIN_TAG_CACHE.computeIfAbsent(texture, s -> new CompoundTag().
+        return SKIN_TAG_CACHE.computeIfAbsent(texture == null ? skullId : texture, s -> new CompoundTag().
                 putString("ModelId", skullId == null ? UUID.randomUUID().toString() : skullId).
                 putString("GeometryName", SkinUtil.PLACED_SKULL_GEOMETRY_NAME).
                 putByteArray("GeometryData", SkinUtil.PLACED_SKULL_GEOMETRY.getBytes(StandardCharsets.UTF_8)).
