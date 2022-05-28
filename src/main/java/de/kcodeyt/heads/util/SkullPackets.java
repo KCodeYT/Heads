@@ -19,8 +19,11 @@ package de.kcodeyt.heads.util;
 import cn.nukkit.Player;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.data.EntityMetadata;
+import cn.nukkit.entity.data.Skin;
 import cn.nukkit.network.protocol.*;
 import de.kcodeyt.heads.entity.EntitySkull;
+
+import java.util.Base64;
 
 public class SkullPackets {
 
@@ -36,10 +39,17 @@ public class SkullPackets {
     public SkullPackets(EntitySkull entitySkull) {
         this.entitySkull = entitySkull;
 
+        final Skin skin = new Skin();
+        skin.setGeometryData(entitySkull.getSkin().getGeometryData());
+        skin.setSkinResourcePatch(entitySkull.getSkin().getSkinResourcePatch());
+        skin.setSkinData(entitySkull.getSkin().getSkinData());
+        skin.setSkinId(Base64.getEncoder().encodeToString(entitySkull.getSkin().getSkinData().data));
+        skin.setTrusted(true);
+
         this.addToListPacket = new PlayerListPacket();
         this.addToListPacket.type = PlayerListPacket.TYPE_ADD;
         this.addToListPacket.entries = new PlayerListPacket.Entry[]{new PlayerListPacket.Entry(
-                entitySkull.getUniqueId(), entitySkull.getId(), entitySkull.getName(), entitySkull.getSkin()
+                entitySkull.getUniqueId(), entitySkull.getId(), entitySkull.getName(), skin
         )};
 
         this.setEntityDataPacket = new SetEntityDataPacket();

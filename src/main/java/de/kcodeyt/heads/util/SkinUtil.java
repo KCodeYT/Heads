@@ -25,9 +25,9 @@ import de.kcodeyt.heads.util.api.SkinAPI;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.Map;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
@@ -66,7 +66,7 @@ public class SkinUtil {
             }
 
             try(final InputStream inputStream = textureFile != null && textureFile.exists() ?
-                    new FileInputStream(textureFile) :
+                    Files.newInputStream(textureFile.toPath()) :
                     new URL(textureUrl).openStream()) {
                 final BufferedImage bufferedImage = ImageIO.read(inputStream);
                 if(textureFile != null && !textureFile.exists())

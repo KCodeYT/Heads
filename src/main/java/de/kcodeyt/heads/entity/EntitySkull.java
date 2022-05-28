@@ -31,9 +31,10 @@ import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.nbt.tag.IntTag;
 import cn.nukkit.nbt.tag.ListTag;
 import de.kcodeyt.heads.provider.SkullProvider;
+import de.kcodeyt.heads.provider.SpawnProvider;
 import de.kcodeyt.heads.util.SkullPackets;
+import lombok.Getter;
 
-import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 public class EntitySkull extends EntityHuman {
@@ -44,6 +45,7 @@ public class EntitySkull extends EntityHuman {
     private static final Item[] EMPTY_ITEMS_ARRAY = new Item[0];
 
     private final Vector3 boundBlock;
+    @Getter
     private final SkullPackets skullPackets;
 
     private int closeTimer;
@@ -97,16 +99,15 @@ public class EntitySkull extends EntityHuman {
 
     @Override
     public void spawnTo(Player player) {
-        if(this.distance(player) > 64) return;
         if(this.hasSpawned.containsKey(player.getLoaderId())) return;
         this.hasSpawned.put(player.getLoaderId(), player);
-        this.skullPackets.spawnTo(player);
+        SpawnProvider.spawnTo(player, this);
     }
 
     @Override
     public void despawnFrom(Player player) {
         if(this.hasSpawned.remove(player.getLoaderId()) == null) return;
-        this.skullPackets.despawnFrom(player);
+        SpawnProvider.despawnFrom(player, this);
     }
 
     @Override
@@ -131,8 +132,7 @@ public class EntitySkull extends EntityHuman {
 
     @Override
     public boolean entityBaseTick(int tickDiff) {
-        for(Player player : new ArrayList<>(this.hasSpawned.values()))
-            if(this.distance(player) > 64) this.despawnFrom(player);
+        SpawnProvider.tick(this.server);
         this.spawnToAll();
 
         if(this.level.getBlock(this.boundBlock).getId() != Block.SKULL_BLOCK) {
