@@ -36,17 +36,17 @@ jobs:
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
-      - name: Create Draft
+      - name: Create Pre-Release
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
         with:
-          draft: true
+          prerelease: true
           tag_name: ${{env.VER}}
           release_name: HeadPlugin v${{env.VER}}
 
-      - name: Upload plugin as draft
+      - name: Upload plugin as pre release
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
