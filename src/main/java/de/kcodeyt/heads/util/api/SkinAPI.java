@@ -38,7 +38,7 @@ public class SkinAPI {
 
     private static final Gson GSON = new Gson();
 
-    private static final Pattern UUID_PATTERN = Pattern.compile("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})");
+    private static final Pattern UUID_PATTERN = Pattern.compile("([a-fA-F\\d]{8}-[a-fA-F\\d]{4}-[a-fA-F\\d]{4}-[a-fA-F\\d]{4}-[a-fA-F\\d]{12})");
 
     private static final Map<String, String> UUID_CACHE = new ConcurrentHashMap<>();
     private static final List<SkinData> SKIN_CACHE = new CopyOnWriteArrayList<>();
