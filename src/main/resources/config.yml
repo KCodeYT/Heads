@@ -1,0 +1,18 @@
+# The scale of the skulls possible values: (VANILLA, SAFE_OVERLAY, THICK)
+# VANILLA: The skull entities have the same size as the vanilla skulls
+# SAFE_OVERLAY: The skull entities have a slightly bigger size than the vanilla skulls
+# THICK: The skull entities have a much bigger size than the vanilla skulls
+skull-scale: VANILLA
+
+# Should we cache the skulls resolved with the mojang skin api, so we do not have to do it again?
+save-skin-cache: true
+
+# The folder where we will save the skin cache
+skin-cache-folder: skins
+
+# The folder where we will save the local player skins
+local-skin-folder: local_skins
+
+# The default language used by this plugin (if the language used by the player is not supported)
+# Currently available: en_US, de_DE
+default-lang: en_US

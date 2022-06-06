@@ -16,11 +16,9 @@
 
 package de.kcodeyt.heads.util.api;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Value;
 
-@Getter
-@AllArgsConstructor
+@Value
 public class SkinResponse {
 
     public static final SkinResponse NOT_FOUND = new SkinResponse(false, null);
@@ -29,7 +27,7 @@ public class SkinResponse {
         return new SkinResponse(true, skinData);
     }
 
-    private final boolean success;
-    private final SkinData skinData;
+    boolean success;
+    SkinData skinData;
 
 }

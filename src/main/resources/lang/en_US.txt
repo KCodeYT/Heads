@@ -1,4 +1,5 @@
 console-uses-player-command=&cThis command can only be used by players!
+error-while-giving-head=&cAn error occurred while giving the head!
 head-command-usage=&cUsage: {0}
 invalid-name=&cInvalid name!
 player-not-found=&cThe player could not be found!

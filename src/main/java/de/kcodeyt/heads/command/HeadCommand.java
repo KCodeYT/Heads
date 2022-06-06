@@ -19,10 +19,9 @@ package de.kcodeyt.heads.command;
 import cn.nukkit.Player;
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
-import de.kcodeyt.heads.Heads;
+import de.kcodeyt.heads.api.HeadAPI;
 import de.kcodeyt.heads.lang.Language;
 import de.kcodeyt.heads.lang.TranslationKey;
-import de.kcodeyt.heads.util.HeadInput;
 import de.kcodeyt.heads.util.PluginHolder;
 
 public class HeadCommand extends Command {
@@ -51,27 +50,27 @@ public class HeadCommand extends Command {
 
         final String skullOwner = String.join(" ", args);
 
-        Heads.createItem(HeadInput.ofLocal(skullOwner)).whenComplete((result, throwable) -> {
+        HeadAPI.giveHead(player, skullOwner).whenComplete((result, throwable) -> {
             if(result == null || throwable != null) {
-                if(skullOwner.contains(" ")) {
-                    player.sendMessage(language.translate(player, TranslationKey.INVALID_NAME));
-                    return;
-                }
-
-                Heads.createItem(HeadInput.ofPlayer(skullOwner)).whenComplete((otherResult, otherThrowable) -> {
-                    if(otherResult == null || otherThrowable != null) {
-                        player.sendMessage(language.translate(player, TranslationKey.PLAYER_NOT_FOUND));
-                        return;
-                    }
-
-                    player.getInventory().addItem(otherResult.getItem());
-                    player.sendMessage(language.translate(player, TranslationKey.HEAD_GIVEN, otherResult.getName()));
-                });
+                player.sendMessage(language.translate(player, TranslationKey.ERROR_WHILE_GIVING_HEAD));
                 return;
             }
 
-            player.getInventory().addItem(result.getItem());
-            player.sendMessage(language.translate(player, TranslationKey.HEAD_GIVEN, result.getName()));
+            if(!result.isSuccess()) {
+                switch(result.getCause()) {
+                    case INVALID_NAME:
+                        player.sendMessage(language.translate(player, TranslationKey.INVALID_NAME));
+                        return;
+                    case PLAYER_NOT_FOUND:
+                        player.sendMessage(language.translate(player, TranslationKey.PLAYER_NOT_FOUND));
+                        return;
+                    default:
+                        player.sendMessage(language.translate(player, TranslationKey.ERROR_WHILE_GIVING_HEAD));
+                        return;
+                }
+            }
+
+            player.sendMessage(language.translate(player, TranslationKey.HEAD_GIVEN, result.getPlayerName()));
         });
         return false;
     }

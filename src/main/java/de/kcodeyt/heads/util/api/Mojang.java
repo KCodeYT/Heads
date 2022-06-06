@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 @SuppressWarnings("ALL")
-public class Mojang {
+public final class Mojang {
 
     public static final HttpRequest<UserProfile> API = new HttpRequest<>("https://api.mojang.com/users/profiles/minecraft/", UserProfile.class);
     public static final HttpRequest<SessionProfile> SESSION_SERVER = new HttpRequest<>("https://sessionserver.mojang.com/session/minecraft/profile/", SessionProfile.class);

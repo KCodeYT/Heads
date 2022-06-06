@@ -19,8 +19,6 @@ package de.kcodeyt.heads;
 import cn.nukkit.block.Block;
 import cn.nukkit.blockentity.BlockEntity;
 import cn.nukkit.entity.Entity;
-import cn.nukkit.item.Item;
-import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.utils.Config;
 import de.kcodeyt.heads.block.BlockSkull;
@@ -29,9 +27,8 @@ import de.kcodeyt.heads.command.HeadCommand;
 import de.kcodeyt.heads.entity.EntitySkull;
 import de.kcodeyt.heads.lang.Language;
 import de.kcodeyt.heads.listener.EventListener;
-import de.kcodeyt.heads.util.*;
-import de.kcodeyt.heads.util.api.SkinAPI;
-import de.kcodeyt.heads.util.api.SkinData;
+import de.kcodeyt.heads.util.LocalSkinAPI;
+import de.kcodeyt.heads.util.PluginHolder;
 import lombok.Getter;
 
 import java.io.BufferedReader;
@@ -53,29 +50,8 @@ public class Heads extends PluginBase {
     public void onLoad() {
         PluginHolder.init(this);
 
+        this.saveResource("config.yml");
         final Config config = this.getConfig();
-        config.reload();
-        if(!config.exists("skull-scale")) {
-            config.set("skull-scale", "VANILLA");
-            config.save();
-        }
-        if(!config.exists("save-skin-cache")) {
-            config.set("save-skin-cache", true);
-            config.save();
-        }
-        if(!config.exists("skin-cache-folder")) {
-            config.set("skin-cache-folder", "./skins/");
-            config.save();
-        }
-        if(!config.exists("local-skin-folder")) {
-            config.set("local-skin-folder", "./local_skins/");
-            config.save();
-        }
-
-        if(!config.exists("default_lang")) {
-            config.set("default_lang", DEFAULT_LANGUAGE);
-            config.save();
-        }
 
         final File langDir = new File(this.getDataFolder(), "lang");
         final File[] files = langDir.listFiles();
@@ -132,40 +108,6 @@ public class Heads extends PluginBase {
     @Override
     public void onDisable() {
         LocalSkinAPI.saveNameLookup();
-    }
-
-    public static ScheduledFuture<ItemResult> createItem(HeadInput input) {
-        switch(input.getType()) {
-            case LOCAL:
-                final String skinId = LocalSkinAPI.getLatestSkinId(input.getName());
-                if(skinId == null) return ScheduledFuture.completed(null);
-
-                final String originalName = LocalSkinAPI.getPlayerName(skinId);
-
-                return ScheduledFuture.completed(new ItemResult(Heads.createItemByOwner(new SkullOwner(skinId, originalName, null)), originalName));
-            case PLAYER:
-                return SkinAPI.getSkin(input.getName()).thenApply(skinResponse -> {
-                    if(skinResponse.isSuccess()) {
-                        final SkinData skinData = skinResponse.getSkinData();
-                        return new ItemResult(Heads.createItemByOwner(new SkullOwner(skinData.getSkinOwnerUniqueId(), skinData.getSkinOwnerName(), skinData.getTexture())), skinData.getSkinOwnerName());
-                    }
-                    throw EXCEPTION;
-                });
-            case TEXTURE:
-                return ScheduledFuture.completed(new ItemResult(Heads.createItemByOwner(new SkullOwner(input.getUniqueId(), null, input.getTexture())), null));
-        }
-        return ScheduledFuture.completed(null);
-    }
-
-    public static Item createItemByOwner(SkullOwner skullOwner) {
-        final Item item = Heads.createItemByType(3).setNamedTag(new CompoundTag().putCompound("SkullOwner", skullOwner.toCompoundTag()));
-        if(skullOwner.getName() != null)
-            item.setCustomName("§r§f" + skullOwner.getName() + "'s Head");
-        return item;
-    }
-
-    public static Item createItemByType(int skullType) {
-        return Item.get(Item.SKULL, skullType, 1);
     }
 
 }

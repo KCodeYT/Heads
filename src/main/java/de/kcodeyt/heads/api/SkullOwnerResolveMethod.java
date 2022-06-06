@@ -14,30 +14,29 @@
  * limitations under the License.
  */
 
-package de.kcodeyt.heads.lang;
+package de.kcodeyt.heads.api;
 
-import lombok.Getter;
+public enum SkullOwnerResolveMethod {
 
-import java.util.Locale;
+    /**
+     * Resolves the skull owner by using a local players name.
+     */
+    LOCAL,
 
-/**
- * @author Kevims KCodeYT
- * @version 1.0
- */
-public enum TranslationKey {
+    /**
+     * Resolves the skull owner by using the mojang skin api and the players name.
+     */
+    MOJANG,
 
-    CONSOLE_USES_PLAYER_COMMAND,
-    HEAD_COMMAND_USAGE,
-    ERROR_WHILE_GIVING_HEAD,
-    INVALID_NAME,
-    PLAYER_NOT_FOUND,
-    HEAD_GIVEN;
+    /**
+     * Resolves the skull owner by using the local players name and if it was not found by
+     * using the mojang skin api and the players name instead.
+     */
+    LOCAL_AND_MOJANG,
 
-    @Getter
-    private final String key;
-
-    TranslationKey() {
-        this.key = this.name().toLowerCase(Locale.ROOT).replace("_", "-");
-    }
+    /**
+     * Resolves the skull owner by using the texture url.
+     */
+    TEXTURE
 
 }

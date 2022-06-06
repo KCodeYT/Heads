@@ -21,7 +21,7 @@ import cn.nukkit.block.Block;
 import cn.nukkit.item.Item;
 import cn.nukkit.math.BlockFace;
 import cn.nukkit.nbt.tag.CompoundTag;
-import de.kcodeyt.heads.Heads;
+import de.kcodeyt.heads.api.HeadAPI;
 import de.kcodeyt.heads.blockentity.BlockEntitySkull;
 
 public class BlockSkull extends cn.nukkit.block.BlockSkull {
@@ -50,7 +50,7 @@ public class BlockSkull extends cn.nukkit.block.BlockSkull {
     public Item[] getDrops(Item item) {
         final BlockEntitySkull blockEntity = (BlockEntitySkull) this.getLevel().getBlockEntity(this);
         if(blockEntity != null && blockEntity.getSkullOwner() != null)
-            return new Item[]{Heads.createItemByOwner(blockEntity.getSkullOwner())};
+            return new Item[]{HeadAPI.createSkullItemByOwner(blockEntity.getSkullOwner())};
         return super.getDrops(item);
     }
 

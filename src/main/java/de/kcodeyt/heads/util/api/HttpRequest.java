@@ -28,7 +28,7 @@ import java.net.URL;
 import static java.net.URLEncoder.encode;
 
 @RequiredArgsConstructor
-class HttpRequest<R> {
+final class HttpRequest<R> {
 
     private static final Gson GSON = new Gson();
 

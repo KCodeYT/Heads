@@ -2,7 +2,7 @@ name: Release this plugin
 
 on:
   push:
-    branches: [ release ]
+    branches: [ next/2.0 ]
 
 jobs:
   build:
@@ -36,16 +36,17 @@ jobs:
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
-      - name: Create Release
+      - name: Create Draft
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
         with:
+          draft: true
           tag_name: ${{env.VER}}
           release_name: HeadPlugin v${{env.VER}}
 
-      - name: Upload plugin as release
+      - name: Upload plugin as draft
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}

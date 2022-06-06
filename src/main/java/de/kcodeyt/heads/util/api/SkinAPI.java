@@ -23,6 +23,7 @@ import de.kcodeyt.heads.util.ScheduledFuture;
 import de.kcodeyt.heads.util.SkinUtil;
 import de.kcodeyt.heads.util.api.Mojang.SessionProfile;
 import de.kcodeyt.heads.util.api.Mojang.UserProfile;
+import lombok.experimental.UtilityClass;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -33,6 +34,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Pattern;
 
+@UtilityClass
 public class SkinAPI {
 
     private static final Gson GSON = new Gson();
@@ -42,7 +44,7 @@ public class SkinAPI {
     private static final Map<String, String> UUID_CACHE = new ConcurrentHashMap<>();
     private static final List<SkinData> SKIN_CACHE = new CopyOnWriteArrayList<>();
 
-    public static ScheduledFuture<SkinResponse> getSkin(String name) {
+    public ScheduledFuture<SkinResponse> getSkin(String name) {
         return ScheduledFuture.supplyAsync(() -> {
             try {
                 String uniqueId;
@@ -88,16 +90,16 @@ public class SkinAPI {
         });
     }
 
-    private static String shrinkBase64(String base64Texture) {
+    private String shrinkBase64(String base64Texture) {
         final Map<String, Object> shrunkMap = Collections.singletonMap("textures", Collections.singletonMap("SKIN", Collections.singletonMap("url", fromBase64(base64Texture))));
         return Base64.getEncoder().encodeToString(GSON.toJson(shrunkMap).getBytes(StandardCharsets.UTF_8));
     }
 
-    public static String fromBase64(String base64Texture) {
+    public String fromBase64(String base64Texture) {
         return GSON.fromJson(new String(Base64.getDecoder().decode(base64Texture)), Mojang.DecodedTexturesProperty.class).getTextures().get("SKIN").getUrl();
     }
 
-    public static ScheduledFuture<SerializedImage> getSkinByTexture(String texture) {
+    public ScheduledFuture<SerializedImage> getSkinByTexture(String texture) {
         final SkinData skin;
         if((skin = SKIN_CACHE.stream().filter(skinData -> skinData.getTexture().equalsIgnoreCase(texture)).findAny().orElse(null)) == null)
             return SkinUtil.base64Texture(texture);

@@ -18,18 +18,18 @@ package de.kcodeyt.heads.util.api;
 
 import cn.nukkit.utils.SerializedImage;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Value;
 
 import java.util.Arrays;
 
+@Value
 @Builder
-@Getter
 public class SkinData {
 
-    private final String texture;
-    private final String skinOwnerName;
-    private final String skinOwnerUniqueId;
-    private final SerializedImage serializedImage;
+    String texture;
+    String skinOwnerName;
+    String skinOwnerUniqueId;
+    SerializedImage serializedImage;
 
     @Override
     public boolean equals(Object obj) {

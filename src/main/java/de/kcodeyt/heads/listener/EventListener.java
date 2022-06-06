@@ -27,7 +27,7 @@ import cn.nukkit.event.player.PlayerChangeSkinEvent;
 import cn.nukkit.event.player.PlayerLoginEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.Level;
-import de.kcodeyt.heads.Heads;
+import de.kcodeyt.heads.api.HeadAPI;
 import de.kcodeyt.heads.blockentity.BlockEntitySkull;
 import de.kcodeyt.heads.util.LocalSkinAPI;
 import de.kcodeyt.heads.util.SkullOwner;
@@ -44,8 +44,8 @@ public class EventListener implements Listener {
 
         if(item.hasCustomBlockData() && blockEntity instanceof BlockEntitySkull) {
             final SkullOwner skullOwner = ((BlockEntitySkull) blockEntity).getSkullOwner();
-            if(skullOwner != null) event.setItem(Heads.createItemByOwner(skullOwner));
-            else event.setItem(Heads.createItemByType(((BlockEntitySkull) blockEntity).getSkullType()));
+            if(skullOwner != null) event.setItem(HeadAPI.createSkullItemByOwner(skullOwner));
+            else event.setItem(HeadAPI.createSkullItemByType(((BlockEntitySkull) blockEntity).getSkullType()));
         }
     }
 
