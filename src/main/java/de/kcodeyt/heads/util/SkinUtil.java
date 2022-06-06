@@ -51,7 +51,7 @@ public class SkinUtil {
         return ScheduledFuture.supplyAsync(() -> {
             final String textureUrl = SkinAPI.fromBase64(texture);
             if(!textureUrl.startsWith(Mojang.TEXTURES))
-                throw Heads.EXCEPTION;
+                throw new IllegalArgumentException("Invalid texture url!");
 
             final String textureId = textureUrl.substring(Mojang.TEXTURES.length());
             final File textureFile;

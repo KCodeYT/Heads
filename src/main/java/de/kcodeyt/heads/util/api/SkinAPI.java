@@ -18,7 +18,6 @@ package de.kcodeyt.heads.util.api;
 
 import cn.nukkit.utils.SerializedImage;
 import com.google.gson.Gson;
-import de.kcodeyt.heads.Heads;
 import de.kcodeyt.heads.util.ScheduledFuture;
 import de.kcodeyt.heads.util.SkinUtil;
 import de.kcodeyt.heads.util.api.Mojang.SessionProfile;
@@ -56,6 +55,8 @@ public class SkinAPI {
                 }
                 if(foundName == null) {
                     final UserProfile userProfile = Mojang.API.request(name);
+                    if(userProfile == null) return SkinResponse.NOT_FOUND;
+
                     uniqueId = UUID_PATTERN.matcher(userProfile.getId()).replaceFirst("$1-$2-$3-$4-$5");
                     playerName = userProfile.getName();
                     UUID_CACHE.put(playerName, uniqueId);
@@ -65,8 +66,7 @@ public class SkinAPI {
                 SkinData skin;
                 if((skin = SKIN_CACHE.stream().filter(skinData -> skinData.getSkinOwnerName().equalsIgnoreCase(playerName) || skinData.getSkinOwnerUniqueId().equals(uniqueId)).findAny().orElse(null)) == null) {
                     final SessionProfile profile = Mojang.SESSION_SERVER.request(uniqueId.replace("-", ""));
-                    if(profile.isError())
-                        return SkinResponse.NOT_FOUND;
+                    if(profile == null || profile.isError()) return SkinResponse.NOT_FOUND;
 
                     final String texture = shrinkBase64(profile.getProperties().stream().
                             filter(property -> property.getName().equals("textures")).findAny().
@@ -85,7 +85,7 @@ public class SkinAPI {
 
                 return SkinResponse.of(skin);
             } catch(Throwable cause) {
-                throw Heads.EXCEPTION;
+                throw new RuntimeException("Error whilst resolving texture by name", cause);
             }
         });
     }

@@ -39,10 +39,6 @@ import java.lang.reflect.Field;
 
 public class Heads extends PluginBase {
 
-    private static final String DEFAULT_LANGUAGE = "en_US";
-
-    public static final RuntimeException EXCEPTION = new RuntimeException();
-
     @Getter
     private Language language;
 
@@ -72,7 +68,7 @@ public class Heads extends PluginBase {
         }
 
         try {
-            final String defaultLang = config.getString("default_lang");
+            final String defaultLang = config.getString("default-lang");
 
             this.language = new Language(langDir, defaultLang);
             this.getLogger().info("This plugin is using the " + this.language.getDefaultLang() + " as default language file!");
