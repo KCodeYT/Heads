@@ -6,6 +6,12 @@ What is this?
 This project is a plugin for the nukkit server software environment.
 This plugin adds player heads to the server.
 
+How can I download this plugin?
+------------------------------
+
+You can find the downloads on the [releases section](https://github.com/KCodeYT/Heads/releases) of this github page.
+There you can find the LATEST jar file of this plugin.
+
 How do I give myself a head?
 ------------------------------
 
@@ -36,7 +42,7 @@ public class YourPlugin {
                 // use result.getCause() to find out why the head was not given
                 return;
             }
-            
+
             // head was given.
         });
     }
