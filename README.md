@@ -16,10 +16,12 @@ How do I give myself a head?
 ------------------------------
 
     1. Open the chat in your client.
-    2. Type /head followed by the name of the skull owner. 
+    2. Ensure you have the operator status on the server or have the permission "heads.command.head", 
+       otherwise you will not be able to use this command.
+    3. Type /head followed by the name of the skull owner.
        (This can be any player which has joined the server once
         or a java editiopn player)
-    3. You will see a head appear in your inventory if the player was found.
+    4. You will see a head appear in your inventory if the player was found.
        If the player was not found, you will see a message in the chat.
 
 Developer API
