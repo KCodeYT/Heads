@@ -120,10 +120,10 @@ public class ScheduledFuture<V> {
 
     public <R> ScheduledFuture<R> thenApply(Function<V, R> function) {
         final ScheduledFuture<R> future = new ScheduledFuture<>(null, true);
-        this.whenCompleteAsync((v, e0) -> {
+        this.whenComplete((v, e0) -> {
             R r = null;
             Exception e1 = e0;
-            if(v != null) {
+            if(e0 == null) {
                 try {
                     r = function.apply(v);
                 } catch(Exception e2) {
@@ -131,6 +131,22 @@ public class ScheduledFuture<V> {
                 }
             }
             future.apply(r, e1);
+        });
+        return future;
+    }
+
+    public <R> ScheduledFuture<R> thenCompose(Function<V, ScheduledFuture<R>> function) {
+        final ScheduledFuture<R> future = new ScheduledFuture<>(null, true);
+        this.whenComplete((v0, e0) -> {
+            if(e0 == null) {
+                try {
+                    function.apply(v0).whenComplete(future::apply);
+                } catch(Exception e1) {
+                    future.apply(null, e1);
+                }
+            } else {
+                future.apply(null, e0);
+            }
         });
         return future;
     }

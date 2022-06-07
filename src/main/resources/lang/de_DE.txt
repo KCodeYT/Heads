@@ -1,4 +1,5 @@
 console-uses-player-command=&cDieser Command kann nur von Spielern ausgeführt werden!
+error-while-giving-head=&cEs ist ein Fehler beim Ausgeben des Kopfes aufgetreten!
 head-command-usage=&cBenutzung: {0}
 invalid-name=&cUngültiger Name!
 player-not-found=&cDieser Spieler konnte nicht gefunden werden!

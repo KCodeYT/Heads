@@ -14,17 +14,21 @@
  * limitations under the License.
  */
 
-package de.kcodeyt.heads.util;
+package de.kcodeyt.heads.api;
 
 import cn.nukkit.item.Item;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Value;
 
-@Getter
-@AllArgsConstructor
+@Value
 public class ItemResult {
 
-    private final Item item;
-    private final String name;
+    /**
+     * The {@link Item} that was created using the skull owner.
+     */
+    Item item;
+    /**
+     * The name of the skull owner.
+     */
+    String name;
 
 }
