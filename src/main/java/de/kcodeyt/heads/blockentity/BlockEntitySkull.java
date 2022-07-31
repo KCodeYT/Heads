@@ -87,6 +87,11 @@ public class BlockEntitySkull extends cn.nukkit.blockentity.BlockEntitySkull {
 
     @Override
     public void close() {
+        if(!this.server.isPrimaryThread()) {
+            this.server.getScheduler().scheduleTask(null, this::close);
+            return;
+        }
+
         if(this.entitySkull != null) this.entitySkull.close();
         super.close();
     }
