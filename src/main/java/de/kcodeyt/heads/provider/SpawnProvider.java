@@ -64,6 +64,7 @@ public class SpawnProvider {
             if(allSkulls.isEmpty()) continue;
 
             final List<EntitySkull> sortedSkulls = new ArrayList<>(allSkulls);
+            sortedSkulls.removeIf(Objects::isNull);
             sortedSkulls.sort(Comparator.comparingDouble(e -> e.distanceSquared(player)));
 
             final int maxSkulls = Math.min(50, sortedSkulls.size());

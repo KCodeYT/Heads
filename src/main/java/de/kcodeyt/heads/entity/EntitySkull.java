@@ -111,6 +111,16 @@ public class EntitySkull extends EntityHuman {
     }
 
     @Override
+    public void close() {
+        if(!this.server.isPrimaryThread()) {
+            this.server.getScheduler().scheduleTask(null, this::close);
+            return;
+        }
+
+        super.close();
+    }
+
+    @Override
     public void saveNBT() {
         this.namedTag = EMPTY_COMPOUND;
     }
